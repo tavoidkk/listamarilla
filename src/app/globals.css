@@ -1,26 +1,250 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/* ============================================================
+ * Base: tokens fijos de la app (no cambian por tenant)
+ * ============================================================ */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter), "Inter", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+
+  --color-base: rgb(var(--color-base-rgb, 223 211 194));
+  --color-surface: rgb(var(--color-surface-rgb, 255 255 255));
+  --color-surface-2: #f7f3ee;
+  --color-surface-translucent: rgb(255 255 255 / 0.92);
+  --color-surface-translucent-strong: rgb(255 255 255 / 0.96);
+  --color-overlay: rgb(0 0 0 / 0.55);
+
+  --color-text-primary: rgb(var(--color-text-primary-rgb, 28 24 48));
+  --color-text-secondary: rgb(var(--color-text-secondary-rgb, 74 68 104));
+  --color-text-muted: #8e8aaa;
+  --color-text-on-primary: #ffffff;
+
+  --color-primary: rgb(var(--color-primary-rgb, 99 85 184));
+  --color-primary-dark: rgb(var(--color-primary-dark-rgb, 78 64 154));
+  --color-primary-light: rgb(var(--color-primary-light-rgb, 237 233 248));
+  --color-primary-text: #ffffff;
+
+  --color-success: #059669;
+  --color-success-bg: #ecfdf5;
+  --color-danger: #dc2626;
+  --color-danger-bg: #fef2f2;
+  --color-warning: #d97706;
+  --color-warning-bg: #fffbeb;
+
+  --color-star-filled: #f59e0b;
+  --color-star-empty: #d1c9e0;
+
+  --color-whatsapp: #25d366;
+  --color-whatsapp-dark: #128c4e;
+
+  --color-border: #e0d8f0;
+  --color-border-focus: rgb(var(--color-primary-rgb, 99 85 184));
+
+  --color-add-card-bg: linear-gradient(135deg, #25d366 0%, #128c4e 100%);
+  --color-add-card-bg-hover: linear-gradient(135deg, #1eb959 0%, #0f7a44 100%);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ============================================================
+ * Reset + base
+ * ============================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  color: var(--color-text-primary);
+  background-color: var(--color-base);
+  line-height: 1.6;
+  min-height: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  background: transparent;
+  color: inherit;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 16px;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 2px;
+}
+
+/* ============================================================
+ * Animaciones
+ * ============================================================ */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes slideUpFade {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ============================================================
+ * Utilidades
+ * ============================================================ */
+.app-container {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.app-fade {
+  animation: fadeIn 0.3s ease;
+}
+
+.bg-app-overlay::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background-color: var(--color-base);
+  pointer-events: none;
+}
+
+.bg-app-overlay::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-primary) 12%, transparent) 0%,
+    color-mix(in srgb, var(--color-primary-dark) 18%, transparent) 100%
+  );
+  pointer-events: none;
+}
+
+.bg-app-background::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background-image: var(--app-background-image, none);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(2px) brightness(0.95);
+  transform: scale(1.04);
+  pointer-events: none;
+}
+
+.bg-app-background::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-primary) 12%, transparent) 0%,
+    color-mix(in srgb, var(--color-primary-dark) 18%, transparent) 100%
+  );
+  pointer-events: none;
+}
+
+/* Tablet/desktop: limita ancho del "mobile-like" portal */
+@media (min-width: 600px) {
+  .app-shell {
+    max-width: 480px;
+    margin: 0 auto;
+    background-color: transparent;
+    box-shadow: 0 0 40px rgb(0 0 0 / 0.18);
+    min-height: 100vh;
+  }
 }
