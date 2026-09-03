@@ -3,6 +3,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { createServiceClient } from "@/lib/supabase/service";
+import { redirect } from "next/navigation";
+
+export async function logoutAction(slug: string) {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect("/login");
+}
 
 async function requireOrg(slug: string) {
   const supabase = await createClient();

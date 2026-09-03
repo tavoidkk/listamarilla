@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { logoutAction } from "@/app/(admin)/o/[slug]/(panel)/login/auth-actions";
+import { logoutAction } from "@/app/(admin)/o/[slug]/panel/actions";
 
 export default async function AdminDashboardPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
