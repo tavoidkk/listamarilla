@@ -1,12 +1,8 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { logoutAction } from "./auth-actions";
+import { logoutAction } from "@/app/(admin)/o/[slug]/(panel)/login/auth-actions";
 
-interface PageProps {
-  params: Promise<{ slug: string }>;
-}
-
-export default async function AdminDashboardPage({ params }: PageProps) {
+export default async function AdminDashboardPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const supabase = await createClient();
   const {
@@ -16,101 +12,100 @@ export default async function AdminDashboardPage({ params }: PageProps) {
 
   const { data: org } = await supabase.from("organizations").select("id, name").eq("slug", slug).single();
   if (!org) return null;
+  const o = org as { id: string; name: string };
 
-  const { count: contactCount } = await supabase
-    .from("contacts")
-    .select("id", { count: "exact", head: true })
-    .eq("org_id", org.id as string);
+  const [contactRes, categoryRes, memberRes, voteRes] = await Promise.all([
+    supabase.from("contacts").select("id", { count: "exact", head: true }).eq("org_id", o.id),
+    supabase.from("categories").select("id", { count: "exact", head: true }).eq("org_id", o.id),
+    supabase
+      .from("memberships")
+      .select("id", { count: "exact", head: true })
+      .eq("org_id", o.id)
+      .eq("status", "active"),
+    supabase.from("contacts").select("rating_count").eq("org_id", o.id),
+  ]);
 
-  const { count: categoryCount } = await supabase
-    .from("categories")
-    .select("id", { count: "exact", head: true })
-    .eq("org_id", org.id as string);
-
-  const { count: voteCount } = await supabase
-    .from("contacts")
-    .select("rating_count", { count: "exact", head: false })
-    .eq("org_id", org.id as string);
-
-  const totalVotes = (voteCount as unknown as { rating_count: number }[] | null)?.reduce(
-    (acc, c) => acc + (c.rating_count ?? 0),
-    0,
-  ) ?? 0;
+  const totalVotes =
+    ((voteRes.data as { rating_count: number }[] | null) ?? []).reduce(
+      (acc, c) => acc + (c.rating_count ?? 0),
+      0,
+    );
 
   return (
-    <div className="min-h-screen">
-      <header className="flex items-center justify-between border-b border-[color:var(--color-border)] bg-white px-6 py-4">
+    <div>
+      <div className="mb-6 flex items-start justify-between gap-4 border-b border-border pb-6">
         <div>
-          <p className="text-xs uppercase tracking-wider text-[color:var(--color-text-muted)]">Panel</p>
-          <h1 className="text-xl font-bold">{org.name}</h1>
+          <p className="mb-1 text-xs font-bold uppercase tracking-wider text-primary-dark">Panel</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">{o.name}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Resumen general del directorio de tu edificio.</p>
         </div>
         <form action={logoutAction.bind(null, slug)}>
           <button
             type="submit"
-            className="rounded-full bg-[color:var(--color-surface-2)] px-4 py-2 text-sm font-semibold text-[color:var(--color-text-secondary)] hover:bg-[color:var(--color-primary-light)]"
+            className="rounded-xl border border-border bg-white px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-surface"
           >
             Cerrar sesión
           </button>
         </form>
-      </header>
+      </div>
 
-      <main className="space-y-4 p-6">
-        <div className="grid grid-cols-3 gap-3">
-          <Stat label="Contactos" value={contactCount ?? 0} />
-          <Stat label="Categorías" value={categoryCount ?? 0} />
-          <Stat label="Votos totales" value={totalVotes} />
+      <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+        <Stat label="Contactos" value={contactRes.count ?? 0} emoji="📇" />
+        <Stat label="Categorías" value={categoryRes.count ?? 0} emoji="🏷️" />
+        <Stat label="Miembros" value={memberRes.count ?? 0} emoji="👥" />
+        <Stat label="Votos totales" value={totalVotes} emoji="⭐" />
+      </div>
+
+      <section>
+        <h2 className="mb-3 text-sm font-bold uppercase tracking-wider text-muted-foreground">
+          Acciones rápidas
+        </h2>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <NavLink href={`/o/${slug}/panel/contactos`} emoji="📇" title="Gestionar contactos" desc="Ver, editar y eliminar" />
+          <NavLink href={`/o/${slug}/panel/categorias`} emoji="🏷️" title="Gestionar categorías" desc="Agregar o quitar" />
+          <NavLink href={`/o/${slug}/panel/configuracion`} emoji="⚙️" title="Configuración del edificio" desc="Pisos y apartamentos" />
+          <NavLink href={`/o/${slug}/panel/codigo-seguridad`} emoji="🔐" title="Código de seguridad" desc="Para vecinos" />
+          <NavLink href={`/o/${slug}/panel/branding`} emoji="🎨" title="Branding del edificio" desc="Colores y logo" />
+          <NavLink href={`/o/${slug}/panel/qr`} emoji="📱" title="Generar QR imprimible" desc="Para el lobby" />
         </div>
-
-        <nav className="grid gap-2">
-          <NavLink href={`/o/${slug}/panel/contactos`}>📇 Gestionar contactos</NavLink>
-          <NavLink href={`/o/${slug}/panel/categorias`}>🏷️ Gestionar categorías</NavLink>
-          <NavLink href={`/o/${slug}/panel/codigo-seguridad`}>🔐 Código de seguridad</NavLink>
-          <NavLink href={`/o/${slug}/panel/branding`}>🎨 Branding del edificio</NavLink>
-          <NavLink href={`/o/${slug}/panel/qr`}>📱 Generar QR para vecinos</NavLink>
-          <NavLink href={`/o/${slug}`} external>
-            👁 Ver portal de vecinos
-          </NavLink>
-        </nav>
-      </main>
+      </section>
     </div>
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat({ label, value, emoji }: { label: string; value: number; emoji: string }) {
   return (
-    <div className="rounded-xl bg-[color:var(--color-surface-2)] p-4 text-center">
-      <p className="text-2xl font-bold text-[color:var(--color-primary)]">{value}</p>
-      <p className="text-xs text-[color:var(--color-text-secondary)]">{label}</p>
+    <div className="rounded-2xl border border-border bg-white p-4 transition-colors hover:border-primary">
+      <div className="mb-2 flex items-center justify-between">
+        <span aria-hidden className="text-2xl">
+          {emoji}
+        </span>
+        <span className="text-3xl font-bold tracking-tight text-foreground">{value}</span>
+      </div>
+      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
     </div>
   );
 }
 
-function NavLink({
-  href,
-  children,
-  external,
-}: {
-  href: string;
-  children: React.ReactNode;
-  external?: boolean;
-}) {
-  if (external) {
-    return (
-      <Link
-        href={href}
-        target="_blank"
-        className="block rounded-xl border border-[color:var(--color-border)] bg-white px-4 py-3 text-sm font-semibold transition-colors hover:bg-[color:var(--color-primary-light)]"
-      >
-        {children}
-      </Link>
-    );
-  }
+function NavLink({ href, title, desc, emoji }: { href: string; title: string; desc: string; emoji: string }) {
   return (
     <Link
       href={href}
-      className="block rounded-xl border border-[color:var(--color-border)] bg-white px-4 py-3 text-sm font-semibold transition-colors hover:bg-[color:var(--color-primary-light)]"
+      className="group flex items-center gap-3 rounded-2xl border border-border bg-white p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:shadow-md"
     >
-      {children}
+      <span
+        aria-hidden
+        className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-primary-light text-2xl transition-transform duration-200 group-hover:scale-105"
+      >
+        {emoji}
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="font-bold text-foreground">{title}</p>
+        <p className="text-xs text-muted-foreground">{desc}</p>
+      </div>
+      <span aria-hidden className="text-muted-foreground transition-transform group-hover:translate-x-1">
+        →
+      </span>
     </Link>
   );
 }

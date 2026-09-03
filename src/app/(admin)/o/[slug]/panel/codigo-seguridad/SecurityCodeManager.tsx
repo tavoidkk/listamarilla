@@ -39,7 +39,7 @@ export function SecurityCodeManager({ slug }: Props) {
   return (
     <form
       onSubmit={handleUpdate}
-      className="rounded-xl border border-[color:var(--color-border)] bg-[color:var(--color-surface-2)] p-4"
+      className="rounded-2xl border border-border bg-surface p-5"
     >
       <Field
         id="newCode"
@@ -50,15 +50,13 @@ export function SecurityCodeManager({ slug }: Props) {
         disabled={isPending}
         hint="Mínimo 4 caracteres. Puedes generarlo automáticamente."
       />
-      <div className="mb-4 flex gap-2">
-        <Button type="button" variant="ghost" size="sm" onClick={generateRandom} disabled={isPending}>
-          🎲 Generar aleatorio
-        </Button>
-      </div>
+      <Button type="button" variant="ghost" size="sm" onClick={generateRandom} disabled={isPending} className="mb-3">
+        🎲 Generar aleatorio
+      </Button>
       <Button type="submit" variant="primary" loading={isPending} disabled={newCode.length < 4} fullWidth>
         Actualizar código
       </Button>
-      <p className="mt-4 text-xs text-[color:var(--color-text-muted)]">
+      <p className="mt-4 rounded-xl bg-warning-bg p-3 text-xs text-warning">
         ⚠ Cambiar el código invalida el anterior. Notifica a los vecinos del nuevo.
       </p>
     </form>

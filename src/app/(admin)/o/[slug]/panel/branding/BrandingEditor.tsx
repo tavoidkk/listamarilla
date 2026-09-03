@@ -18,32 +18,17 @@ interface Props {
   };
 }
 
-function toHex(rgb: string | undefined, fallback: string): string {
-  if (!rgb) return fallback;
-  const [r, g, b] = rgb.split(" ").map(Number);
-  const h = (n: number) => n.toString(16).padStart(2, "0");
-  return `#${h(r)}${h(g)}${h(b)}`;
-}
-
-function fromHex(hex: string): string {
-  const m = hex.replace("#", "");
-  const n = (i: number) => parseInt(m.slice(i, i + 2), 16);
-  return `${n(0)} ${n(1)} ${n(2)}`;
-}
-
-const DEFAULT_COLORS = {
-  primary: "99 85 184",
-  primaryDark: "78 64 154",
-  primaryLight: "237 233 248",
+const DEFAULTS = {
+  primary: "250 204 21",
+  primaryDark: "202 138 4",
+  primaryLight: "254 249 195",
 };
 
 export function BrandingEditor({ slug, initial }: Props) {
   const [name, setName] = useState(initial.name);
-  const [primary, setPrimary] = useState(initial.theme.primary ?? DEFAULT_COLORS.primary);
-  const [primaryDark, setPrimaryDark] = useState(initial.theme.primaryDark ?? DEFAULT_COLORS.primaryDark);
-  const [primaryLight, setPrimaryLight] = useState(
-    initial.theme.primaryLight ?? DEFAULT_COLORS.primaryLight,
-  );
+  const [primary, setPrimary] = useState(initial.theme.primary ?? DEFAULTS.primary);
+  const [primaryDark, setPrimaryDark] = useState(initial.theme.primaryDark ?? DEFAULTS.primaryDark);
+  const [primaryLight, setPrimaryLight] = useState(initial.theme.primaryLight ?? DEFAULTS.primaryLight);
   const [isPending, startTransition] = useTransition();
 
   const previewTheme: Partial<OrgTheme> = { primary, primaryDark, primaryLight };
@@ -58,10 +43,10 @@ export function BrandingEditor({ slug, initial }: Props) {
             primary,
             primaryDark,
             primaryLight,
-            base: initial.theme.base ?? "223 211 194",
-            surface: initial.theme.surface ?? "255 255 255",
-            textPrimary: initial.theme.textPrimary ?? "28 24 48",
-            textSecondary: initial.theme.textSecondary ?? "74 68 104",
+            base: initial.theme.base ?? "255 255 255",
+            surface: initial.theme.surface ?? "249 250 251",
+            textPrimary: initial.theme.textPrimary ?? "15 23 42",
+            textSecondary: initial.theme.textSecondary ?? "71 85 105",
           },
         });
         toast({ kind: "success", message: "Branding guardado" });
@@ -73,30 +58,24 @@ export function BrandingEditor({ slug, initial }: Props) {
 
   return (
     <form onSubmit={handleSave} className="space-y-4">
-      <Field
-        id="name"
-        label="Nombre del edificio"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        disabled={isPending}
-      />
+      <Field id="name" label="Nombre del edificio" value={name} onChange={(e) => setName(e.target.value)} disabled={isPending} />
 
-      <div className="rounded-xl border border-[color:var(--color-border)] bg-[color:var(--color-surface-2)] p-4">
-        <h3 className="mb-3 font-bold">Paleta de colores</h3>
-        <ColorRow label="Color principal" value={primary} onChange={setPrimary} />
-        <ColorRow label="Color principal (oscuro)" value={primaryDark} onChange={setPrimaryDark} />
-        <ColorRow label="Color principal (claro)" value={primaryLight} onChange={setPrimaryLight} />
+      <div className="rounded-2xl border border-border bg-surface p-5">
+        <h3 className="mb-4 font-bold text-foreground">Paleta de colores</h3>
+        <ColorRow label="Principal" value={primary} onChange={setPrimary} />
+        <ColorRow label="Principal oscuro" value={primaryDark} onChange={setPrimaryDark} />
+        <ColorRow label="Principal claro" value={primaryLight} onChange={setPrimaryLight} />
       </div>
 
       <div
-        className="rounded-xl border border-[color:var(--color-border)] p-6 text-center"
+        className="overflow-hidden rounded-2xl border border-border p-8 text-center"
         style={themeToCssVars(previewTheme)}
       >
-        <p className="text-xs uppercase tracking-wider text-white drop-shadow-md">Directorio de servicios</p>
-        <h1 className="mt-2 text-2xl font-bold text-white drop-shadow-lg">{name}</h1>
+        <p className="mb-2 text-xs font-bold uppercase tracking-wider text-white drop-shadow-md">Vista previa</p>
+        <h1 className="mb-4 text-2xl font-bold text-white drop-shadow-lg">{name}</h1>
         <button
           type="button"
-          className="mt-4 inline-flex h-12 items-center justify-center rounded-full bg-[color:var(--color-primary)] px-6 font-semibold text-white"
+          className="inline-flex h-12 items-center justify-center rounded-full bg-primary px-6 font-semibold text-primary-foreground shadow-md transition-transform hover:scale-105"
         >
           Botón de muestra
         </button>
@@ -109,27 +88,30 @@ export function BrandingEditor({ slug, initial }: Props) {
   );
 }
 
-function ColorRow({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-}) {
+function ColorRow({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
     <div className="mb-3 flex items-center justify-between gap-3">
-      <label className="flex-1 text-sm font-medium text-[color:var(--color-text-secondary)]">{label}</label>
+      <label className="flex-1 text-sm font-semibold text-foreground">{label}</label>
       <div className="flex items-center gap-2">
         <input
           type="color"
-          value={toHex(value, "#6355b8")}
+          value={toHex(value)}
           onChange={(e) => onChange(fromHex(e.target.value))}
-          className="h-10 w-10 cursor-pointer rounded border-0"
+          className="h-10 w-10 cursor-pointer rounded-lg border border-border"
+          aria-label={`Selector de color para ${label}`}
         />
-        <code className="rounded bg-white px-2 py-1 text-xs">{value}</code>
+        <code className="rounded bg-white px-2 py-1 text-xs text-muted-foreground">{value}</code>
       </div>
     </div>
   );
+}
+
+function toHex(rgb: string): string {
+  const [r, g, b] = rgb.split(" ").map(Number);
+  return `#${[r, g, b].map((n) => n.toString(16).padStart(2, "0")).join("")}`;
+}
+
+function fromHex(hex: string): string {
+  const m = hex.replace("#", "");
+  return `${[0, 2, 4].map((i) => parseInt(m.slice(i, i + 2), 16)).join(" ")}`;
 }

@@ -1,12 +1,9 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { BrandingEditor } from "./BrandingEditor";
+import { PageHeader } from "@/components/admin/PageBits";
 
-interface PageProps {
-  params: Promise<{ slug: string }>;
-}
-
-export default async function BrandingPage({ params }: PageProps) {
+export default async function BrandingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const supabase = await createClient();
   const { data: org } = await supabase
@@ -16,20 +13,11 @@ export default async function BrandingPage({ params }: PageProps) {
     .single();
   if (!org) return null;
 
-  type OrgRow = {
-    name: string;
-    theme: Record<string, string>;
-    logo_url: string | null;
-    background_url: string | null;
-  };
-  const o = org as OrgRow;
+  const o = org as { name: string; theme: Record<string, string>; logo_url: string | null; background_url: string | null };
 
   return (
-    <div className="p-6">
-      <Link href={`/o/${slug}/panel`} className="mb-4 inline-block text-sm text-[color:var(--color-primary)]">
-        ← Volver al panel
-      </Link>
-      <h2 className="mb-6 text-2xl font-bold">Branding</h2>
+    <div>
+      <PageHeader title="Branding" subtitle="Personaliza los colores de tu edificio." />
       <BrandingEditor
         slug={slug}
         initial={{
@@ -39,6 +27,12 @@ export default async function BrandingPage({ params }: PageProps) {
           background_url: o.background_url ?? null,
         }}
       />
+      <Link
+        href={`/o/${slug}/panel`}
+        className="mt-6 inline-block text-sm font-semibold text-primary-dark hover:underline"
+      >
+        ← Volver al panel
+      </Link>
     </div>
   );
 }

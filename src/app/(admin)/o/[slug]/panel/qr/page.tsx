@@ -1,12 +1,9 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { QRDisplay } from "./QRDisplay";
+import { PageHeader } from "@/components/admin/PageBits";
 
-interface PageProps {
-  params: Promise<{ slug: string }>;
-}
-
-export default async function QRPage({ params }: PageProps) {
+export default async function QRPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const supabase = await createClient();
   const { data: org } = await supabase.from("organizations").select("name").eq("slug", slug).single();
@@ -16,16 +13,15 @@ export default async function QRPage({ params }: PageProps) {
   const url = `${base}/o/${slug}`;
 
   return (
-    <div className="p-6">
-      <Link href={`/o/${slug}/panel`} className="mb-4 inline-block text-sm text-[color:var(--color-primary)]">
+    <div>
+      <PageHeader title="QR para vecinos" subtitle="Imprime y pega en el lobby, ascensor o cartelera." />
+      <QRDisplay url={url} name={(org as { name: string }).name} />
+      <Link
+        href={`/o/${slug}/panel`}
+        className="mt-6 inline-block text-sm font-semibold text-primary-dark hover:underline"
+      >
         ← Volver al panel
       </Link>
-      <h2 className="mb-2 text-2xl font-bold">QR del portal de vecinos</h2>
-      <p className="mb-6 text-sm text-[color:var(--color-text-secondary)]">
-        Imprime este QR y colócalo en la entrada, lobby o ascensor para que los vecinos escaneen y entren
-        al directorio.
-      </p>
-      <QRDisplay url={url} name={org.name as string} />
     </div>
   );
 }

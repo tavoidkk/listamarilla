@@ -22,7 +22,9 @@ async function requireOrg(slug: string) {
     .eq("status", "active")
     .single();
 
-  if (!membership || !["admin", "owner"].includes(membership.role as string)) {
+  const isPlatformOwner = user.app_metadata?.is_platform_owner === true;
+
+  if (!isPlatformOwner && (!membership || membership.role !== "condo_admin")) {
     throw new Error("Sin permisos");
   }
 

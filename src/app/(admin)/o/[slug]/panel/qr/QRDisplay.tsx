@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/Button";
 
 interface Props {
   url: string;
@@ -17,7 +18,7 @@ export function QRDisplay({ url, name }: Props) {
         type: "svg",
         margin: 1,
         width: 320,
-        color: { dark: "#1c1830", light: "#ffffff" },
+        color: { dark: "#0F172A", light: "#FFFFFF" },
       });
       setSvg(data);
     }
@@ -25,26 +26,22 @@ export function QRDisplay({ url, name }: Props) {
   }, [url]);
 
   return (
-    <div className="rounded-xl border border-[color:var(--color-border)] bg-white p-6 text-center">
+    <div className="rounded-2xl border border-border bg-white p-8 text-center shadow-sm">
       <div
-        className="mx-auto mb-4 inline-block rounded-lg bg-white p-4 shadow-md"
+        className="mx-auto mb-5 inline-block rounded-2xl border border-border bg-white p-4 shadow-sm"
         dangerouslySetInnerHTML={{ __html: svg }}
         aria-label={`QR para ${name}`}
       />
-      <p className="mb-1 text-xs uppercase tracking-wider text-[color:var(--color-text-muted)]">
+      <p className="mb-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">
         Escanea para entrar a
       </p>
-      <p className="mb-4 text-lg font-bold">{name}</p>
-      <code className="block break-all rounded bg-[color:var(--color-surface-2)] px-3 py-2 text-xs">
+      <p className="mb-4 text-xl font-bold tracking-tight text-foreground">{name}</p>
+      <code className="mb-5 block break-all rounded-xl bg-surface px-3 py-2 text-xs text-muted-foreground">
         {url}
       </code>
-      <button
-        type="button"
-        onClick={() => window.print()}
-        className="mt-4 inline-flex h-12 items-center justify-center rounded-full bg-[color:var(--color-primary)] px-6 font-semibold text-white"
-      >
+      <Button variant="primary" size="lg" onClick={() => window.print()} fullWidth>
         🖨 Imprimir QR
-      </button>
+      </Button>
     </div>
   );
 }

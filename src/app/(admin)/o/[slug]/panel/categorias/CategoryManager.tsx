@@ -63,8 +63,11 @@ export function CategoryManager({ slug, categories }: Props) {
 
   return (
     <div className="space-y-6">
-      <form onSubmit={handleAdd} className="rounded-xl border border-[color:var(--color-border)] bg-[color:var(--color-surface-2)] p-4">
-        <h3 className="mb-3 font-bold">Crear nueva categoría</h3>
+      <form
+        onSubmit={handleAdd}
+        className="rounded-2xl border border-border bg-surface p-5"
+      >
+        <h3 className="mb-3 font-bold text-foreground">Crear nueva categoría</h3>
         <Field
           id="label"
           label="Nombre"
@@ -91,22 +94,22 @@ export function CategoryManager({ slug, categories }: Props) {
         {categories.map((c) => (
           <div
             key={c.id}
-            className="flex items-center justify-between gap-3 rounded-xl border border-[color:var(--color-border)] bg-white p-3"
+            className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-white p-4 transition-colors hover:border-primary"
           >
             <div className="flex items-center gap-3">
-              <span className="text-2xl" aria-hidden>
+              <span aria-hidden className="text-2xl">
                 {c.emoji}
               </span>
               <div>
-                <p className="font-semibold">{c.label}</p>
-                <p className="text-xs text-[color:var(--color-text-muted)]">{c.key}</p>
+                <p className="font-bold text-foreground">{c.label}</p>
+                <p className="text-xs text-muted-foreground">{c.key}</p>
               </div>
             </div>
             <button
               type="button"
               onClick={() => handleDelete(c.id, c.label)}
               disabled={isPending}
-              className="rounded-full bg-[color:var(--color-danger-bg)] px-3 py-2 text-xs font-semibold text-[color:var(--color-danger)]"
+              className="rounded-xl bg-danger-bg px-3 py-2 text-xs font-bold text-danger transition-colors hover:brightness-95 disabled:opacity-50"
             >
               Eliminar
             </button>
