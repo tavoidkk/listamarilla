@@ -23,9 +23,7 @@ create or replace function public.add_contact_resident(
   p_new_category boolean,
   p_added_by_name text,
   p_added_by_session text,
-  p_floor int,
-  p_apartment text
-)
+  p_floor int default null,\n  p_apartment text default null\n)
 returns public.contacts
 language plpgsql
 security definer
