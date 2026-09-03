@@ -21,13 +21,10 @@ interface Props {
   orgName: string;
 }
 
-function readDisclaimer(orgSlug: string): boolean {
-  if (typeof window === "undefined") return false;
-  return sessionStorage.getItem(DISCLAIMER_KEY_PREFIX + orgSlug) === "1";
-}
-
 export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
-  const [disclaimerAccepted, setDisclaimerAccepted] = useState<boolean>(() => readDisclaimer(orgSlug));
+  // Inicializamos como null para evitar mismatch de hidratación: SSR siempre muestra
+  // el Disclaimer, y en el cliente se ajusta si ya fue aceptado.
+  const [disclaimerAccepted, setDisclaimerAccepted] = useState<boolean | null>(null);
   const [categories, setCategories] = useState<CategoryOption[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<CategoryOption | null>(null);
   const [contacts, setContacts] = useState<ContactItem[]>([]);
@@ -35,6 +32,13 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
   const [registerOpen, setRegisterOpen] = useState(false);
   const [detailContact, setDetailContact] = useState<ContactDetail | null>(null);
   const [alreadyVoted, setAlreadyVoted] = useState(false);
+
+  // Hidratar el estado del disclaimer desde sessionStorage SOLO en cliente
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const accepted = sessionStorage.getItem(DISCLAIMER_KEY_PREFIX + orgSlug) === "1";
+    setDisclaimerAccepted(accepted);
+  }, [orgSlug]);
 
   useEffect(() => {
     let cancelled = false;
@@ -87,20 +91,42 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
       )
       .eq("id", contact.id)
       .single();
-    if (data) {
-      setDetailContact(data as ContactDetail);
-      const sessionId = getSessionId();
-      if (sessionId) {
-        const { data: vote } = await supabase
-          .from("votes")
-          .select("id")
-          .eq("contact_id", contact.id)
-          .eq("session_id", sessionId)
-          .maybeSingle();
-        setAlreadyVoted(Boolean(vote));
-      } else {
-        setAlreadyVoted(false);
-      }
+    if (!data) return;
+    const d = data as {
+      id: string;
+      name: string;
+      phone: string;
+      category_emoji: string | null;
+      category_label: string | null;
+      avg_rating: number;
+      rating_count: number;
+      added_by_name: string | null;
+      floor: number | null;
+      apartment: string | null;
+    };
+    setDetailContact({
+      id: d.id,
+      name: d.name,
+      phone: d.phone,
+      category_emoji: d.category_emoji,
+      category_label: d.category_label,
+      avg_rating: d.avg_rating,
+      rating_count: d.rating_count,
+      added_by_name: d.added_by_name,
+      floor: d.floor,
+      apartment: d.apartment,
+    });
+    const sessionId = getSessionId();
+    if (sessionId) {
+      const { data: vote } = await supabase
+        .from("votes")
+        .select("id")
+        .eq("contact_id", contact.id)
+        .eq("session_id", sessionId)
+        .maybeSingle();
+      setAlreadyVoted(Boolean(vote));
+    } else {
+      setAlreadyVoted(false);
     }
   }
 
@@ -109,12 +135,12 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
     setDisclaimerAccepted(true);
   }
 
-  async function handleSubmitContact(payload: NewContactPayload) {
+  async function handleSubmitContact(payload: NewContactPayload): Promise<void> {
     const supabase = createClient();
     const sessionId = getSessionId();
     if (!sessionId) throw new Error("No se pudo identificar la sesión del navegador");
 
-    const { data, error } = await supabase.rpc("add_contact_resident", {
+    const { error } = await supabase.rpc("add_contact_resident", {
       p_org_slug: orgSlug,
       p_security_code: payload.security_code,
       p_phone: payload.phone,
@@ -126,8 +152,8 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
       p_new_category: payload.new_category,
       p_added_by_name: payload.added_by_name,
       p_added_by_session: sessionId,
-      p_floor: payload.floor,
-      p_apartment: payload.apartment,
+      p_floor: payload.floor ?? undefined,
+      p_apartment: payload.apartment ?? undefined,
     });
     if (error) throw error;
 
@@ -150,7 +176,6 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
       setContactsLoading(false);
       if (refreshed) setContacts(refreshed as ContactItem[]);
     }
-    return data;
   }
 
   async function handleVote(rating: number) {
@@ -166,33 +191,32 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
     });
     if (error) throw error;
 
-    if (data) {
-      const updated = data as unknown as ContactDetail;
-      setDetailContact((prev) =>
-        prev
+    if (!data) return;
+    const updated = data as unknown as ContactDetail;
+    setDetailContact((prev) =>
+      prev
+        ? {
+            ...prev,
+            avg_rating: Number(updated.avg_rating),
+            rating_count: updated.rating_count,
+          }
+        : prev,
+    );
+    setContacts((prev) =>
+      prev.map((c) =>
+        c.id === updated.id
           ? {
-              ...prev,
+              ...c,
               avg_rating: Number(updated.avg_rating),
               rating_count: updated.rating_count,
             }
-          : prev,
-      );
-      setContacts((prev) =>
-        prev.map((c) =>
-          c.id === updated.id
-            ? {
-                ...c,
-                avg_rating: Number(updated.avg_rating),
-                rating_count: updated.rating_count,
-              }
-            : c,
-        ),
-      );
-      setAlreadyVoted(true);
-    }
+          : c,
+      ),
+    );
+    setAlreadyVoted(true);
   }
 
-  if (!disclaimerAccepted) {
+  if (disclaimerAccepted !== true) {
     return <Disclaimer orgName={orgName} onAccept={handleAcceptDisclaimer} />;
   }
 
@@ -206,6 +230,7 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
         />
         <RegisterModal
           open={registerOpen}
+          orgId={orgId}
           categories={categories}
           onClose={() => setRegisterOpen(false)}
           onSubmit={handleSubmitContact}
@@ -217,18 +242,19 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
 
   return (
     <>
-      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-white/40 bg-[color:var(--color-base)]/82 px-6 py-4 backdrop-blur-md">
+      {/* Header amarillo cuando estás dentro de una categoría */}
+      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-amber-500/30 bg-amber-400 px-6 py-4 shadow-md">
         <button
           type="button"
           onClick={() => setSelectedCategory(null)}
           aria-label="Volver"
-          className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-[22px] text-[color:var(--color-text-primary)] shadow-sm transition-transform active:scale-95"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-amber-600/20 bg-white text-xl text-slate-900 shadow-sm transition-all duration-200 hover:bg-amber-50 active:scale-95"
         >
           ←
         </button>
-        <div className="flex flex-1 flex-col items-center gap-[2px] text-center">
-          <p className="text-sm font-semibold text-[color:var(--color-primary)]">{orgName}</p>
-          <p className="inline-flex items-center gap-1.5 text-xs text-[color:var(--color-text-secondary)]">
+        <div className="flex flex-1 flex-col items-center gap-0.5 text-center">
+          <p className="text-xs font-bold uppercase tracking-wider text-amber-900/80">{orgName}</p>
+          <p className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-900">
             <span aria-hidden>{selectedCategory.emoji}</span>
             {selectedCategory.label}
           </p>
@@ -243,17 +269,19 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
         onAddClick={() => setRegisterOpen(true)}
       />
 
+      {/* Botón flotante + agregar en amarillo */}
       <button
         type="button"
         onClick={() => setRegisterOpen(true)}
         aria-label="Agregar contacto"
-        className="fixed bottom-6 right-6 z-50 flex h-[60px] w-[60px] items-center justify-center rounded-full bg-[color:var(--color-primary)] text-[28px] font-light text-white shadow-lg transition-transform active:scale-[0.93]"
+        className="fixed bottom-6 right-6 z-50 flex h-[60px] w-[60px] items-center justify-center rounded-full bg-amber-400 text-3xl font-light text-slate-900 shadow-xl ring-4 ring-amber-400/20 transition-all duration-200 hover:scale-105 hover:bg-amber-500 hover:shadow-2xl active:scale-[0.93]"
       >
         +
       </button>
 
       <RegisterModal
         open={registerOpen}
+        orgId={orgId}
         categories={categories}
         onClose={() => setRegisterOpen(false)}
         onSubmit={handleSubmitContact}

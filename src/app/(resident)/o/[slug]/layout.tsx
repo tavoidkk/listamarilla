@@ -19,19 +19,12 @@ export default async function ResidentLayout({ children, params }: LayoutProps) 
     .single();
 
   if (error || !org) notFound();
-  if (!["trial", "active"].includes(org.subscription_status)) notFound();
+  if (!["trial", "active"].includes(org.subscription_status as string)) notFound();
 
-  const cssVars = themeToCssVars(org.theme);
-  const hasBackground = Boolean(org.background_url);
+  const cssVars = themeToCssVars(org.theme as Record<string, string>);
 
   return (
-    <div
-      className={hasBackground ? "bg-app-background" : "bg-app-overlay"}
-      style={{
-        ...cssVars,
-        ...(org.background_url ? { "--app-background-image": `url(${org.background_url})` } : {}),
-      }}
-    >
+    <div className="bg-white" style={cssVars}>
       <div className="app-shell app-container app-fade">{children}</div>
       <ToastContainer />
     </div>

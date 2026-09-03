@@ -43,7 +43,7 @@ export function ContactDetailModal({
 
   async function handleVote() {
     if (rating === 0) {
-      toast({ kind: "error", message: "Selecciona una calificación" });
+      toast({ kind: "error", message: "Selecciona una calificación primero" });
       return;
     }
     setSubmitting(true);
@@ -61,39 +61,41 @@ export function ContactDetailModal({
 
   return (
     <Modal open={open} onClose={onClose} variant="bottom" ariaLabel="Detalle de contacto">
-      <div className="mb-4 text-center">
+      <div className="mb-5 text-center">
         <div
           aria-hidden
-          className="mx-auto mb-4 flex h-[72px] w-[72px] items-center justify-center rounded-full bg-[color:var(--color-primary-light)] text-[48px]"
+          className="mx-auto mb-4 flex h-[80px] w-[80px] items-center justify-center rounded-2xl bg-primary-light text-5xl"
         >
           {contact.category_emoji ?? "🔧"}
         </div>
-        <h2 className="mb-2 break-words text-2xl font-bold text-[color:var(--color-text-primary)]">
-          {contact.name}
-        </h2>
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-[color:var(--color-primary-light)] px-3.5 py-1.5 text-[13px] font-semibold text-[color:var(--color-primary)]">
+        <h2 className="mb-2 break-words text-2xl font-bold text-foreground">{contact.name}</h2>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-light px-4 py-1.5 text-sm font-semibold text-primary-dark">
           {contact.category_emoji ?? "🛠️"} {contact.category_label ?? "Servicio"}
         </span>
       </div>
 
-      <div className="border-t border-[color:var(--color-border)] px-0 py-6">
-        <div className="mb-4 flex items-center justify-between gap-4 px-0 text-sm">
-          <span className="text-[color:var(--color-text-muted)]">Calificación</span>
-          <StarRating
-            value={Number(contact.avg_rating)}
-            count={contact.rating_count}
-            size="sm"
-            showValue
-          />
+      <div className="space-y-3 border-y border-border py-4">
+        <div className="flex items-center justify-between gap-4">
+          <span className="text-sm font-medium text-muted-foreground">Calificación</span>
+          {contact.rating_count > 0 ? (
+            <StarRating
+              value={Number(contact.avg_rating)}
+              count={contact.rating_count}
+              size="sm"
+              showValue
+            />
+          ) : (
+            <span className="text-sm italic text-muted-foreground">Sin votos</span>
+          )}
         </div>
         {contact.added_by_name ? (
-          <div className="mb-4 flex items-center justify-between gap-4 text-sm">
-            <span className="text-[color:var(--color-text-muted)]">Agregado por</span>
-            <span className="text-right font-medium text-[color:var(--color-text-primary)]">
+          <div className="flex items-center justify-between gap-4 text-sm">
+            <span className="text-muted-foreground">Recomendado por</span>
+            <span className="text-right font-medium text-foreground">
               {contact.added_by_name}
               {contact.floor || contact.apartment ? (
-                <span className="block text-xs text-[color:var(--color-text-muted)]">
-                  {contact.floor ? `P${contact.floor}` : ""}
+                <span className="block text-xs text-muted-foreground">
+                  {contact.floor ? `Piso ${contact.floor}` : ""}
                   {contact.floor && contact.apartment ? " · " : ""}
                   {contact.apartment ? `Apt ${contact.apartment}` : ""}
                 </span>
@@ -104,32 +106,31 @@ export function ContactDetailModal({
       </div>
 
       {alreadyVoted ? (
-        <p className="mb-2 text-center text-sm font-semibold text-[color:var(--color-success)]">
-          Ya calificaste a este contacto
-        </p>
+        <div className="mt-5 rounded-xl bg-success-bg p-3 text-center text-sm font-semibold text-success">
+          ✓ Ya calificaste este contacto
+        </div>
       ) : (
-        <div className="border-t border-[color:var(--color-border)] pt-6">
-          <p className="mb-4 text-center text-sm font-semibold text-[color:var(--color-text-secondary)]">
-            Califica este servicio
-          </p>
+        <div className="mt-5">
+          <p className="mb-3 text-center text-sm font-semibold text-muted-foreground">¿Cómo te fue?</p>
           <InteractiveStarRating value={rating} onChange={setRating} disabled={submitting} />
         </div>
       )}
 
-      <div className="mt-6 flex flex-col gap-3 border-t border-[color:var(--color-border)] pt-6">
+      <div className="mt-6 flex flex-col gap-3">
         {!alreadyVoted ? (
-          <Button variant="primary" onClick={handleVote} loading={submitting} disabled={rating === 0} fullWidth>
+          <Button variant="primary" size="lg" onClick={handleVote} loading={submitting} disabled={rating === 0} fullWidth>
             Enviar calificación
           </Button>
         ) : null}
         <Button
           variant="whatsapp"
+          size="lg"
           onClick={() => window.open(wa, "_blank", "noopener,noreferrer")}
           fullWidth
         >
           💬 Abrir WhatsApp
         </Button>
-        <Button variant="ghost" onClick={onClose} fullWidth>
+        <Button variant="ghost" size="md" onClick={onClose} fullWidth>
           Cerrar
         </Button>
       </div>
