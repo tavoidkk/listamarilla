@@ -38,7 +38,7 @@ export function Modal({
 
   const panelClass =
     variant === "bottom"
-      ? "w-full max-w-full max-h-[92vh] overflow-y-auto rounded-t-3xl bg-white px-6 pb-8 pt-3 shadow-2xl animate-[slideUp_0.32s_cubic-bezier(0.32,0.72,0,1)] sm:max-w-[480px] sm:rounded-3xl"
+      ? "relative w-full max-w-full max-h-[92vh] overflow-y-auto rounded-t-3xl bg-white px-6 pb-8 pt-3 shadow-2xl animate-[slideUp_0.32s_cubic-bezier(0.32,0.72,0,1)] sm:max-w-[480px] sm:rounded-3xl"
       : "relative w-full max-w-[520px] max-h-[90vh] overflow-y-auto rounded-3xl bg-white p-8 shadow-2xl animate-[scaleIn_0.2s_ease]";
 
   const containerClass =
