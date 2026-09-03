@@ -225,6 +225,7 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
       <>
         <CategorySelector
           categories={categories}
+          orgName={orgName}
           onSelect={setSelectedCategory}
           onAddClick={() => setRegisterOpen(true)}
         />
