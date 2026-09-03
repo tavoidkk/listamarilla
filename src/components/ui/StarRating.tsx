@@ -17,7 +17,7 @@ export function StarRating({ value, count, size = "md", showValue = false }: Sta
   const { star, gap } = SIZES[size];
   const rounded = Math.round(value * 2) / 2;
   return (
-    <span className={`inline-flex items-center ${gap} text-sm font-medium text-[color:var(--color-text-primary)]`}>
+    <span className={`inline-flex items-center ${gap} text-sm font-medium text-foreground`}>
       <span className="inline-flex items-center" aria-hidden>
         {[1, 2, 3, 4, 5].map((n) => {
           const fill = rounded >= n ? 1 : rounded >= n - 0.5 ? 0.5 : 0;
@@ -25,12 +25,12 @@ export function StarRating({ value, count, size = "md", showValue = false }: Sta
         })}
       </span>
       {showValue ? (
-        <span className="ml-1 text-sm font-semibold text-[color:var(--color-text-primary)]">
+        <span className="ml-1 text-sm font-semibold text-foreground">
           {value > 0 ? value.toFixed(1) : "—"}
         </span>
       ) : null}
       {typeof count === "number" ? (
-        <span className="ml-1 text-xs text-[color:var(--color-text-muted)]">({count})</span>
+        <span className="ml-1 text-xs text-muted-foreground">({count})</span>
       ) : null}
     </span>
   );
@@ -42,8 +42,7 @@ interface StarProps {
 }
 
 function Star({ fill, size }: StarProps) {
-  const path =
-    "M12 2 L14.85 8.4 L22 9.27 L16.5 14.14 L18.18 21 L12 17.27 L5.82 21 L7.5 14.14 L2 9.27 L9.15 8.4 Z";
+  const path = "M12 2 L14.85 8.4 L22 9.27 L16.5 14.14 L18.18 21 L12 17.27 L5.82 21 L7.5 14.14 L2 9.27 L9.15 8.4 Z";
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden>
       <defs>
@@ -97,7 +96,7 @@ export function InteractiveStarRating({ value, onChange, disabled }: Interactive
           );
         })}
       </div>
-      <p className="h-[22px] text-sm font-semibold text-[color:var(--color-primary)]">
+      <p className="h-[22px] text-sm font-semibold text-primary">
         {value > 0 ? RATING_LABELS[value] : ""}
       </p>
     </div>

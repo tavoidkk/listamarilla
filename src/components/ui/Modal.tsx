@@ -6,6 +6,7 @@ interface ModalProps {
   open: boolean;
   onClose?: () => void;
   closeOnOverlay?: boolean;
+  hideCloseButton?: boolean;
   variant?: "bottom" | "center";
   children: ReactNode;
   ariaLabel?: string;
@@ -15,6 +16,7 @@ export function Modal({
   open,
   onClose,
   closeOnOverlay = true,
+  hideCloseButton = false,
   variant = "bottom",
   children,
   ariaLabel,
@@ -36,12 +38,12 @@ export function Modal({
 
   const panelClass =
     variant === "bottom"
-      ? "w-full max-w-full max-h-[90vh] overflow-y-auto rounded-t-3xl bg-white/98 px-6 pb-8 pt-4 backdrop-blur-md animate-[slideUp_0.3s_cubic-bezier(0.32,0.72,0,1)] sm:max-w-[480px] sm:rounded-3xl"
-      : "w-full max-w-[360px] rounded-3xl bg-white/98 p-8 backdrop-blur-md animate-[scaleIn_0.2s_ease] shadow-2xl";
+      ? "w-full max-w-full max-h-[92vh] overflow-y-auto rounded-t-3xl bg-white px-6 pb-8 pt-3 shadow-2xl animate-[slideUp_0.32s_cubic-bezier(0.32,0.72,0,1)] sm:max-w-[480px] sm:rounded-3xl"
+      : "relative w-full max-w-[520px] max-h-[90vh] overflow-y-auto rounded-3xl bg-white p-8 shadow-2xl animate-[scaleIn_0.2s_ease]";
 
   const containerClass =
     variant === "bottom"
-      ? "flex items-end justify-center pb-0 sm:items-center sm:pb-4"
+      ? "flex items-end justify-center sm:items-center"
       : "flex items-center justify-center p-4";
 
   return (
@@ -49,7 +51,7 @@ export function Modal({
       role="dialog"
       aria-modal="true"
       aria-label={ariaLabel}
-      className="fixed inset-0 z-[100] flex animate-[fadeIn_0.2s_ease] bg-[color:var(--color-overlay)]"
+      className="fixed inset-0 z-[100] flex animate-[fadeIn_0.2s_ease] bg-slate-950/60 backdrop-blur-md"
       onClick={(e) => {
         if (e.target === e.currentTarget && closeOnOverlay) onClose?.();
       }}
@@ -57,14 +59,17 @@ export function Modal({
       <div className={containerClass}>
         <div className={panelClass}>
           {variant === "bottom" ? (
-            <div className="mx-auto mb-4 h-1 w-10 rounded-sm bg-[color:var(--color-border)]" aria-hidden />
+            <div
+              className="mx-auto mb-5 h-1 w-10 rounded-full bg-border"
+              aria-hidden
+            />
           ) : null}
-          {onClose ? (
+          {onClose && !hideCloseButton ? (
             <button
               type="button"
               onClick={onClose}
               aria-label="Cerrar"
-              className="absolute right-4 top-4 z-[2] inline-flex h-11 w-11 items-center justify-center rounded-full bg-[color:var(--color-surface-2)] text-xl text-[color:var(--color-text-primary)] transition-colors hover:bg-[color:var(--color-primary-light)]"
+              className="absolute right-4 top-4 z-[2] inline-flex h-10 w-10 items-center justify-center rounded-full bg-surface-2 text-lg text-foreground transition-colors hover:bg-primary-light"
             >
               ✕
             </button>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { CircleCheck, CircleX, Info } from "lucide-react";
 
 type ToastKind = "success" | "error" | "info";
 type ToastInput = { kind?: ToastKind; message: string; duration?: number };
@@ -18,7 +19,7 @@ export function toast(input: ToastInput | string) {
     id: ++counter,
     kind: t.kind ?? "info",
     message: t.message,
-    duration: t.duration ?? 2400,
+    duration: t.duration ?? 2800,
   };
   listeners.forEach((fn) => fn(item));
 }
@@ -43,28 +44,29 @@ export function ToastContainer() {
 
   return (
     <div
-      className="pointer-events-none fixed bottom-[100px] left-1/2 z-[200] flex -translate-x-1/2 flex-col gap-2"
+      className="pointer-events-none fixed bottom-6 left-1/2 z-[200] flex -translate-x-1/2 flex-col gap-2"
       aria-live="polite"
     >
-      {items.map((t) => (
-        <div
-          key={t.id}
-          role="status"
-          className={[
-            "animate-[slideUp_0.25s_ease] rounded-full px-5 py-3 text-sm font-medium text-white shadow-lg backdrop-blur",
-            t.kind === "success" ? "bg-[color:var(--color-success)]" : "",
-            t.kind === "error" ? "bg-[color:var(--color-danger)]" : "",
-            t.kind === "info" ? "bg-[color:var(--color-primary)]" : "",
-          ]
-            .filter(Boolean)
-            .join(" ")}
-        >
-          <span aria-hidden className="mr-2">
-            {t.kind === "success" ? "✓" : t.kind === "error" ? "✕" : "ℹ"}
-          </span>
-          {t.message}
-        </div>
-      ))}
+      {items.map((t) => {
+        const colorClass =
+          t.kind === "success"
+            ? "bg-emerald-600 border-emerald-700"
+            : t.kind === "error"
+              ? "bg-red-600 border-red-700"
+              : "bg-slate-900 border-slate-800";
+        const Icon =
+          t.kind === "success" ? CircleCheck : t.kind === "error" ? CircleX : Info;
+        return (
+          <div
+            key={t.id}
+            role="status"
+            className={`animate-[slideUp_0.28s_cubic-bezier(0.32,0.72,0,1)] flex items-center gap-2.5 rounded-xl border px-4 py-3 text-sm font-semibold text-white shadow-2xl ${colorClass}`}
+          >
+            <Icon className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+            <span>{t.message}</span>
+          </div>
+        );
+      })}
     </div>
   );
 }

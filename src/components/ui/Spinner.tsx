@@ -11,7 +11,7 @@ export function Spinner({ size = 24, className = "", color = "currentColor" }: S
     <span
       role="status"
       aria-label="Cargando"
-      className={`inline-block animate-[spin_0.8s_linear_infinite] ${className}`}
+      className={`inline-block animate-[spin_0.7s_linear_infinite] ${className}`}
       style={{ width: size, height: size }}
     >
       <svg
@@ -20,7 +20,7 @@ export function Spinner({ size = 24, className = "", color = "currentColor" }: S
         xmlns="http://www.w3.org/2000/svg"
         style={{ width: size, height: size, color }}
       >
-        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity="0.25" strokeWidth="3" />
+        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity="0.2" strokeWidth="3" />
         <path
           d="M22 12a10 10 0 0 1-10 10"
           stroke="currentColor"
@@ -34,8 +34,17 @@ export function Spinner({ size = 24, className = "", color = "currentColor" }: S
 
 export function PageSpinner() {
   return (
-    <div className="flex items-center justify-center px-8 py-8">
-      <Spinner size={40} />
+    <div className="flex items-center justify-center px-8 py-12">
+      <Spinner size={36} />
     </div>
+  );
+}
+
+/**
+ * Skeleton de card (para cuando están cargando los contactos)
+ */
+export function CardSkeleton() {
+  return (
+    <div className="skeleton mb-3 h-[100px] w-full rounded-2xl" aria-hidden />
   );
 }

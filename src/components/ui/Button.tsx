@@ -2,7 +2,7 @@
 
 import { type ButtonHTMLAttributes, forwardRef } from "react";
 
-export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "whatsapp";
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "whatsapp" | "outline";
 export type ButtonSize = "sm" | "md" | "lg" | "xl";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -10,25 +10,27 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   size?: ButtonSize;
   fullWidth?: boolean;
   loading?: boolean;
+  pulse?: boolean;
 }
 
 const VARIANTS: Record<ButtonVariant, string> = {
   primary:
-    "bg-[color:var(--color-primary)] text-white hover:bg-[color:var(--color-primary-dark)] active:scale-[0.98]",
+    "bg-amber-400 text-slate-900 hover:bg-amber-300 shadow-sm active:scale-95 font-semibold focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:outline-none",
   secondary:
-    "bg-[color:var(--color-primary-light)] text-[color:var(--color-primary)] hover:brightness-95 active:scale-[0.98]",
+    "bg-slate-100 text-slate-800 hover:bg-slate-200 active:scale-95 font-medium focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:outline-none",
+  outline:
+    "bg-white text-slate-800 border border-slate-200 hover:border-amber-400 hover:bg-amber-50 active:scale-95 font-semibold focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:outline-none",
   ghost:
-    "bg-transparent text-[color:var(--color-text-secondary)] hover:bg-[color:var(--color-primary-light)]",
-  danger: "bg-[color:var(--color-danger)] text-white hover:brightness-110",
-  whatsapp:
-    "bg-[color:var(--color-whatsapp)] text-white hover:bg-[color:var(--color-whatsapp-dark)]",
+    "bg-transparent text-slate-600 hover:bg-slate-100 active:scale-95 focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:outline-none",
+  danger: "bg-danger text-white hover:brightness-110 active:scale-95 font-semibold focus:ring-2 focus:ring-danger focus:ring-offset-2 focus:outline-none",
+  whatsapp: "bg-whatsapp text-white hover:bg-whatsapp-dark active:scale-95 font-semibold focus:ring-2 focus:ring-whatsapp focus:ring-offset-2 focus:outline-none",
 };
 
 const SIZES: Record<ButtonSize, string> = {
-  sm: "h-10 px-4 text-sm rounded-full",
-  md: "h-12 px-5 text-base rounded-full",
-  lg: "h-14 px-6 text-base rounded-full",
-  xl: "h-[56px] px-7 text-[17px] rounded-full font-semibold",
+  sm: "h-10 px-4 text-sm rounded-xl gap-2",
+  md: "h-11 px-5 text-base rounded-xl gap-2",
+  lg: "h-12 px-6 text-base rounded-xl gap-2",
+  xl: "h-14 px-7 text-lg rounded-xl gap-2.5",
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
@@ -37,6 +39,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     size = "md",
     fullWidth = false,
     loading = false,
+    pulse = false,
     className = "",
     children,
     disabled,
@@ -52,12 +55,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       type={type}
       disabled={isDisabled}
       className={[
-        "inline-flex items-center justify-center gap-2 font-semibold transition-[transform,background-color,filter] duration-200",
-        "active:scale-[0.98]",
+        "inline-flex items-center justify-center transition-all duration-200",
         VARIANTS[variant],
         SIZES[size],
         fullWidth ? "w-full" : "",
         isDisabled ? "cursor-not-allowed opacity-60" : "",
+        pulse && !isDisabled ? "animate-[pulseYellow_2s_ease-in-out_infinite]" : "",
         className,
       ]
         .filter(Boolean)
@@ -66,7 +69,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     >
       {loading ? (
         <span
-          className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent"
+          className="inline-block h-5 w-5 animate-[spin_0.7s_linear_infinite] rounded-full border-2 border-current border-t-transparent"
           aria-hidden="true"
         />
       ) : null}
