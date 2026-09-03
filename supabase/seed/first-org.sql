@@ -57,6 +57,7 @@ begin
     (v_org_id, 'plomeria',          'Plomería',                    '🔧', 10),
     (v_org_id, 'electricidad',      'Electricidad',                '⚡', 20),
     (v_org_id, 'carpinteria',       'Carpintería',                 '🪚', 30),
+    (v_org_id, 'tapiceria',         'Tapicería',                   '🛋️', 35),
     (v_org_id, 'mecanica',          'Mecánica automotriz',         '🚗', 40),
     (v_org_id, 'albanileria',       'Albañilería',                 '🧱', 50),
     (v_org_id, 'refrigeracion',     'Refrigeración / A/A',         '❄️', 60),
@@ -80,7 +81,7 @@ begin
   raise notice '✅ Owner asignado al user: %', v_owner_user_id;
   raise notice '✅ Admin demo asignado al user: % (email: %)', v_admin_user_id, v_admin_demo_email;
   raise notice '✅ Configuración: 13 pisos, apartamentos A/B/C, PB como piso especial';
-  raise notice '✅ 20 categorías seed creadas';
+  raise notice '✅ 21 categorías seed creadas';
 end $$;
 
 -- Verificación
