@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Directorio de servicios para tu edificio",
     start_url: "/",
     display: "standalone",
-    background_color: "#dfd3c2",
-    theme_color: "#6355b8",
+    background_color: "#FFFFFF",
+    theme_color: "#FACC15",
     orientation: "portrait",
     icons: [
       {

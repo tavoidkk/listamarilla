@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegister } from "@/components/ui/ServiceWorkerRegister";
@@ -9,15 +9,22 @@ const inter = Inter({
   display: "swap",
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: "#facc15",
+};
+
 export const metadata: Metadata = {
-  title: "Páginas Amarillas",
+  title: "LISTAMARILLA — Directorio para juntas de condominio",
   description:
     "Directorio de servicios para juntas de condominio y residentes. Encuentra prestadores de confianza en tu edificio.",
-  applicationName: "Páginas Amarillas",
+  applicationName: "LISTAMARILLA",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Páginas Amarillas",
+    title: "LISTAMARILLA",
   },
   formatDetection: {
     telephone: false,
@@ -27,8 +34,8 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="es" className={`${inter.variable} h-full antialiased`}>
-      <body className="bg-app-overlay min-h-full">
-        {children}
+      <body className="bg-app-overlay min-h-screen">
+        <div className="flex min-h-screen flex-1 flex-col">{children}</div>
         {process.env.NODE_ENV === "production" ? <ServiceWorkerRegister /> : null}
       </body>
     </html>

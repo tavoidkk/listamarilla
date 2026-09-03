@@ -1,40 +1,43 @@
 import type { OrgTheme } from "@/types/database";
-import { DEFAULT_THEME } from "@/types/database";
 
 /**
- * Convierte el campo `theme` de la DB (jsonb) en CSS custom properties.
- * Acepta `Json` porque Supabase tipa jsonb como unión amplia.
+ * Tokens para theming dinámico por org (inyectados via inline style).
+ * Los valores son tripletes RGB "r g b" para que las utilities CSS
+ * var(--color-primary-rgb) generadas en @theme los usen.
  */
-export function themeToCssVars(theme: unknown): React.CSSProperties {
-  const t = { ...DEFAULT_THEME, ...(isOrgTheme(theme) ? theme : {}) };
+export const DEFAULT_THEME_RGB = {
+  primary: "250 204 21", // #facc15
+  primaryDark: "202 138 4", // #ca8a04
+  primaryLight: "254 249 195", // #fef9c3
+  base: "255 255 255",
+  surface: "249 250 251",
+  textPrimary: "15 23 42",
+  textSecondary: "71 85 105",
+};
+
+/**
+ * Convierte el theme de la DB en CSS custom properties para inyectar
+ * en el style del wrapper del portal de vecinos (theming por org).
+ */
+export function themeToCssVars(theme: Partial<OrgTheme> | null | undefined): React.CSSProperties {
+  const t = { ...DEFAULT_THEME_RGB, ...(theme ?? {}) };
   return {
-    "--color-primary": t.primary,
-    "--color-primary-dark": t.primaryDark,
-    "--color-primary-light": t.primaryLight,
-    "--color-base": t.base,
-    "--color-surface": t.surface,
-    "--color-text-primary": t.textPrimary,
-    "--color-text-secondary": t.textSecondary,
+    "--color-primary-rgb": t.primary,
+    "--color-primary-dark-rgb": t.primaryDark,
+    "--color-primary-light-rgb": t.primaryLight,
+    "--color-base-rgb": t.base,
+    "--color-surface-rgb": t.surface,
+    "--color-text-primary-rgb": t.textPrimary,
+    "--color-text-secondary-rgb": t.textSecondary,
   } as React.CSSProperties;
 }
 
-function isOrgTheme(v: unknown): v is Partial<OrgTheme> {
-  return typeof v === "object" && v !== null && !Array.isArray(v);
-}
-
-/**
- * Convierte un OrgTheme a la sintaxis Tailwind v4 `@theme inline`.
- * Solo se usa en globals.css para registrar colores base.
- */
-export function themeToTailwindVars(theme: Partial<OrgTheme> | null | undefined): string {
-  const t = { ...DEFAULT_THEME, ...(theme ?? {}) };
-  return [
-    `--color-primary: rgb(${t.primary});`,
-    `--color-primary-dark: rgb(${t.primaryDark});`,
-    `--color-primary-light: rgb(${t.primaryLight});`,
-    `--color-base: rgb(${t.base});`,
-    `--color-surface: rgb(${t.surface});`,
-    `--color-text-primary: rgb(${t.textPrimary});`,
-    `--color-text-secondary: rgb(${t.textSecondary});`,
-  ].join("\n  ");
-}
+export const DEFAULT_THEME: OrgTheme = {
+  primary: DEFAULT_THEME_RGB.primary,
+  primaryDark: DEFAULT_THEME_RGB.primaryDark,
+  primaryLight: DEFAULT_THEME_RGB.primaryLight,
+  base: DEFAULT_THEME_RGB.base,
+  surface: DEFAULT_THEME_RGB.surface,
+  textPrimary: DEFAULT_THEME_RGB.textPrimary,
+  textSecondary: DEFAULT_THEME_RGB.textSecondary,
+};
