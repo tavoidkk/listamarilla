@@ -14,6 +14,7 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     "node_modules/**",
     "public/sw.js",
+    "src/types/supabase.ts",
   ]),
   {
     rules: {

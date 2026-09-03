@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Desactivar el indicador de devtools (ícono de Next.js) que aparece abajo
+  devIndicators: false,
   // Permitir imágenes de Supabase Storage
   images: {
     remotePatterns: [
