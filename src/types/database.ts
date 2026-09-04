@@ -93,6 +93,10 @@ export interface Vote {
   contact_id: string;
   session_id: string;
   rating: number;
+  voter_name: string | null;
+  floor: number | null;
+  apartment: string | null;
+  comment: string | null;
   created_at: string;
 }
 
