@@ -8,10 +8,12 @@ import { updateSecurityCodeAction } from "../actions";
 
 interface Props {
   slug: string;
+  currentCode: string | null;
 }
 
-export function SecurityCodeManager({ slug }: Props) {
+export function SecurityCodeManager({ slug, currentCode }: Props) {
   const [newCode, setNewCode] = useState("");
+  const [shownCode, setShownCode] = useState<string | null>(currentCode);
   const [isPending, startTransition] = useTransition();
 
   async function handleUpdate(e: React.FormEvent) {
@@ -23,6 +25,7 @@ export function SecurityCodeManager({ slug }: Props) {
     startTransition(async () => {
       try {
         await updateSecurityCodeAction(slug, newCode);
+        setShownCode(newCode);
         toast({ kind: "success", message: "Código actualizado" });
         setNewCode("");
       } catch (err) {
@@ -41,6 +44,10 @@ export function SecurityCodeManager({ slug }: Props) {
       onSubmit={handleUpdate}
       className="rounded-2xl border border-border bg-surface p-5"
     >
+      <p className="mb-4 rounded-xl bg-info-bg p-3 text-sm">
+        <span className="font-semibold">Código actual: </span>
+        <code className="font-mono">{shownCode ? shownCode : "—"}</code>
+      </p>
       <Field
         id="newCode"
         label="Nuevo código"

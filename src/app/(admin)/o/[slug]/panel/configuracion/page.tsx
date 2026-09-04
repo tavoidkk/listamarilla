@@ -1,14 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
 import { ConfiguracionForm } from "./ConfiguracionForm";
 import { PageHeader } from "@/components/admin/PageBits";
+import { getOrgBySlug } from "@/lib/data/orgs";
 
 export default async function ConfiguracionPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const supabase = await createClient();
-  const { data: org } = await supabase.from("organizations").select("id").eq("slug", slug).single();
+  const org = await getOrgBySlug(slug);
   if (!org) return null;
 
-  const o = org as { id: string };
+  const o = org;
 
   const { data: config } = await supabase
     .from("org_floor_config")
@@ -27,6 +28,7 @@ export default async function ConfiguracionPage({ params }: { params: Promise<{ 
       <PageHeader
         title="Configuración del edificio"
         subtitle="Define cuántos pisos tiene y qué apartamentos hay por piso."
+        backHref={`/o/${slug}/panel`}
       />
 
       <ConfiguracionForm slug={slug} initial={initial} />

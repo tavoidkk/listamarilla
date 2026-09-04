@@ -59,6 +59,7 @@ export function AdminSidebar({ slug, orgName }: AdminSidebarProps) {
         <Link
           href={`/o/${slug}`}
           target="_blank"
+          rel="noopener noreferrer"
           className="mt-4 flex items-center justify-center gap-2 rounded-xl border border-border bg-white px-3 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-primary-light"
         >
           👁 Ver portal vecinos
@@ -66,7 +67,7 @@ export function AdminSidebar({ slug, orgName }: AdminSidebarProps) {
       </aside>
 
       <nav
-        className="sticky bottom-0 left-0 right-0 z-30 flex justify-around border-t border-border bg-white/95 px-2 py-2 backdrop-blur md:hidden"
+        className="fixed bottom-0 left-0 right-0 z-30 flex justify-around border-t border-border bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] py-2 backdrop-blur md:hidden"
         aria-label="Navegación mobile"
       >
         {NAV_ITEMS.slice(0, 5).map((item) => (

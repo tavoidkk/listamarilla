@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useOptimistic, useTransition, startTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Modal } from "@/components/ui/Modal";
 import { UserCheck, UserX, Trash2, Plus, Pencil, X, Mail } from "lucide-react";
@@ -38,37 +38,68 @@ export function MembersAdminPanel({
 }: MembersAdminPanelProps) {
   const router = useRouter();
 
+  // Estado optimista para acciones de fila (suspender / reactivar / quitar)
+  const [optimisticMembers, reduceMembers] = useOptimistic(
+    members,
+    (state: Member[], action: { type: "status" | "remove"; id: string; status?: string }) => {
+      if (action.type === "remove") {
+        return state.filter((m) => m.id !== action.id);
+      }
+      return state.map((m) =>
+        m.id === action.id ? { ...m, status: action.status ?? m.status } : m,
+      );
+    },
+  );
+
+  function handleSuspend(m: Member) {
+    reduceMembers({ type: "status", id: m.id, status: "suspended" });
+    startTransition(async () => {
+      await suspendAction(m.id);
+      router.refresh();
+    });
+    toast({ kind: "info", message: "Administrador suspendido" });
+  }
+
+  function handleReactivate(m: Member) {
+    reduceMembers({ type: "status", id: m.id, status: "active" });
+    startTransition(async () => {
+      await reactivateAction(m.id);
+      router.refresh();
+    });
+    toast({ kind: "success", message: "Administrador reactivado" });
+  }
+
+  function handleRemove(m: Member) {
+    if (!confirm(`¿Quitar a ${m.email ?? m.user_id} de la organización?`)) return;
+    reduceMembers({ type: "remove", id: m.id });
+    startTransition(async () => {
+      await removeAction(m.id);
+      router.refresh();
+    });
+  }
+
   return (
     <>
       {/* Administradores de condominio actuales */}
       <section className="mb-6 rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-100 px-5 py-4">
           <h2 className="text-base font-bold text-slate-900">
-            Administradores de condominio ({members.length})
+            Administradores de condominio ({optimisticMembers.length})
           </h2>
         </div>
-        {members.length === 0 ? (
+        {optimisticMembers.length === 0 ? (
           <p className="p-5 text-center text-sm italic text-slate-500">
             Esta organización aún no tiene administradores. Crea uno abajo.
           </p>
         ) : (
           <ul className="divide-y divide-slate-100">
-            {members.map((m) => (
+            {optimisticMembers.map((m) => (
               <MemberRow
                 key={m.id}
                 member={m}
-                onSuspend={() => {
-                  void suspendAction(m.id).then(() => router.refresh());
-                  toast({ kind: "info", message: "Administrador suspendido" });
-                }}
-                onReactivate={() => {
-                  void reactivateAction(m.id).then(() => router.refresh());
-                  toast({ kind: "success", message: "Administrador reactivado" });
-                }}
-                onRemove={() => {
-                  if (!confirm(`¿Quitar a ${m.email ?? m.user_id} de la organización?`)) return;
-                  return removeAction(m.id).then(() => router.refresh());
-                }}
+                onSuspend={() => handleSuspend(m)}
+                onReactivate={() => handleReactivate(m)}
+                onRemove={() => handleRemove(m)}
               />
             ))}
           </ul>

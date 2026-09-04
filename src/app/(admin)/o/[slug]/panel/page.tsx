@@ -1,18 +1,17 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { logoutAction } from "@/app/(admin)/o/[slug]/panel/actions";
+import { getOrgBySlug } from "@/lib/data/orgs";
+import { getCurrentUser } from "@/lib/data/session";
 
 export default async function AdminDashboardPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
+  const org = await getOrgBySlug(slug);
+  const user = await getCurrentUser();
+  if (!org || !user) return null;
 
-  const { data: org } = await supabase.from("organizations").select("id, name").eq("slug", slug).single();
-  if (!org) return null;
-  const o = org as { id: string; name: string };
+  const o = org;
 
   const [contactRes, categoryRes, memberRes, voteRes] = await Promise.all([
     supabase.from("contacts").select("id", { count: "exact", head: true }).eq("org_id", o.id),
@@ -33,7 +32,7 @@ export default async function AdminDashboardPage({ params }: { params: Promise<{
 
   return (
     <div>
-      <div className="mb-6 flex items-start justify-between gap-4 border-b border-border pb-6">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4 border-b border-border pb-6">
         <div>
           <p className="mb-1 text-xs font-bold uppercase tracking-wider text-primary-dark">Panel</p>
           <h1 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">{o.name}</h1>

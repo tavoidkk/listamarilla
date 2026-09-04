@@ -2,7 +2,6 @@ import { unstable_noStore as noStore } from "next/cache";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Building2, ExternalLink, CalendarClock } from "lucide-react";
-import { createServiceClient } from "@/lib/supabase/service";
 import { MembersAdminPanel } from "@/app/(platform)/superadmin/MembersAdminPanel";
 import { ToastContainer } from "@/components/ui/Toast";
 import {
@@ -15,29 +14,11 @@ import {
   reactivateMemberAction,
   removeMemberAction,
 } from "@/app/(platform)/superadmin/actions";
+import { getOrgByIdAdmin } from "@/lib/data/orgs";
+import { getOrgMembersWithProfiles, enrichMembersWithEmails } from "@/lib/data/superadmin";
 
 interface PageProps {
   params: Promise<{ orgId: string }>;
-}
-
-interface OrgDetail {
-  id: string;
-  slug: string;
-  name: string;
-  plan: string;
-  subscription_status: string;
-  subscription_ends_at: string | null;
-  trial_ends_at: string | null;
-  created_at: string;
-}
-
-interface MemberWithEmail {
-  id: string;
-  user_id: string;
-  role: string;
-  status: string;
-  profiles: { full_name: string | null } | null;
-  email: string | null;
 }
 
 function formatDate(iso: string | null | undefined): string {
@@ -58,42 +39,15 @@ function daysUntil(iso: string | null | undefined): number | null {
 export default async function OrgDetailPage({ params }: PageProps) {
   noStore();
   const { orgId } = await params;
-  const svc = createServiceClient();
 
-  const { data: org } = await svc
-    .from("organizations")
-    .select(
-      "id, slug, name, plan, subscription_status, subscription_ends_at, trial_ends_at, created_at",
-    )
-    .eq("id", orgId)
-    .maybeSingle();
-
-  if (!org) notFound();
-  const o = org as unknown as OrgDetail;
+  const o = await getOrgByIdAdmin(orgId);
+  if (!o) notFound();
 
   const cutOff = o.subscription_status === "active" ? o.subscription_ends_at : o.trial_ends_at;
   const days = daysUntil(cutOff);
 
-  const { data: membersRaw } = await svc
-    .from("memberships")
-    .select("id, user_id, role, status, profiles:profiles!memberships_user_id_fkey ( full_name )")
-    .eq("org_id", orgId)
-    .order("created_at", { ascending: true });
-
-  const members = (membersRaw as unknown as Array<Omit<MemberWithEmail, "email">> | null) ?? [];
-
-  const { data: authList } = await svc.auth.admin.listUsers({ page: 1, perPage: 500 });
-  const emailByUserId = new Map<string, string>();
-  if (authList?.users) {
-    for (const u of authList.users) {
-      if (u.id && u.email) emailByUserId.set(u.id, u.email);
-    }
-  }
-
-  const membersWithEmail: MemberWithEmail[] = members.map((m) => ({
-    ...m,
-    email: emailByUserId.get(m.user_id) ?? null,
-  }));
+  const members = await getOrgMembersWithProfiles(orgId);
+  const membersWithEmail = await enrichMembersWithEmails(members);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 lg:px-8">

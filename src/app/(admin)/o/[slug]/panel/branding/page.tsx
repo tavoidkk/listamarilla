@@ -1,23 +1,18 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
 import { BrandingEditor } from "./BrandingEditor";
 import { PageHeader } from "@/components/admin/PageBits";
+import { getOrgBySlug } from "@/lib/data/orgs";
 
 export default async function BrandingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const supabase = await createClient();
-  const { data: org } = await supabase
-    .from("organizations")
-    .select("name, theme, logo_url, background_url")
-    .eq("slug", slug)
-    .single();
+  const org = await getOrgBySlug(slug);
   if (!org) return null;
 
-  const o = org as { name: string; theme: Record<string, string>; logo_url: string | null; background_url: string | null };
+  const o = org;
 
   return (
     <div>
-      <PageHeader title="Branding" subtitle="Personaliza los colores de tu edificio." />
+      <PageHeader title="Branding" subtitle="Personaliza los colores de tu edificio." backHref={`/o/${slug}/panel`} />
       <BrandingEditor
         slug={slug}
         initial={{

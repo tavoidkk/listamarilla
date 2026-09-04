@@ -1,14 +1,11 @@
 import { notFound, redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { ToastContainer } from "@/components/ui/Toast";
 import { OwnerShell } from "./OwnerShell";
+import { getCurrentUser } from "@/lib/data/session";
 
 export default async function SuperAdminLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   if (!user) redirect(`/login`);
 

@@ -2,14 +2,15 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { deleteContactAction } from "../actions";
 import { PageHeader, EmptyState } from "@/components/admin/PageBits";
+import { getOrgBySlug } from "@/lib/data/orgs";
 
 export default async function ContactsAdminPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const supabase = await createClient();
-  const { data: org } = await supabase.from("organizations").select("id").eq("slug", slug).single();
+  const org = await getOrgBySlug(slug);
   if (!org) return null;
 
-  const o = org as { id: string };
+  const o = org;
 
   const { data: contacts } = await supabase
     .from("contacts")
@@ -21,7 +22,7 @@ export default async function ContactsAdminPage({ params }: { params: Promise<{ 
 
   return (
     <div>
-      <PageHeader title="Contactos" subtitle={`${list.length} en tu directorio`} />
+      <PageHeader title="Contactos" subtitle={`${list.length} en tu directorio`} backHref={`/o/${slug}/panel`} />
 
       {list.length > 0 ? (
         <div className="space-y-2">

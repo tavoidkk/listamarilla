@@ -1,14 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
 import { CategoryManager } from "./CategoryManager";
 import { PageHeader, EmptyState } from "@/components/admin/PageBits";
+import { getOrgBySlug } from "@/lib/data/orgs";
 
 export default async function CategoriesAdminPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const supabase = await createClient();
-  const { data: org } = await supabase.from("organizations").select("id").eq("slug", slug).single();
+  const org = await getOrgBySlug(slug);
   if (!org) return null;
 
-  const o = org as { id: string };
+  const o = org;
 
   const { data: categories } = await supabase
     .from("categories")
@@ -20,7 +21,7 @@ export default async function CategoriesAdminPage({ params }: { params: Promise<
 
   return (
     <div>
-      <PageHeader title="Categorías" subtitle={`${list.length} en tu edificio`} />
+      <PageHeader title="Categorías" subtitle={`${list.length} en tu edificio`} backHref={`/o/${slug}/panel`} />
 
       {list.length > 0 ? (
         <CategoryManager slug={slug} categories={list} />

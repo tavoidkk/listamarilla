@@ -3,11 +3,12 @@ import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { createServiceClient } from "@/lib/supabase/service";
 import { OwnersAdminPanel } from "@/app/(platform)/superadmin/OwnersAdminPanel";
 import { ToastContainer } from "@/components/ui/Toast";
+import { listAuthUsers } from "@/lib/data/superadmin";
 
 export default async function OwnersPage() {
   const svc = createServiceClient();
 
-  const { data: authList } = await svc.auth.admin.listUsers({ page: 1, perPage: 500 });
+  const authList = await listAuthUsers();
 
   type OwnerRow = {
     id: string;
@@ -18,7 +19,7 @@ export default async function OwnersPage() {
     last_sign_in_at: string | null;
   };
 
-  const owners: OwnerRow[] = (authList?.users ?? []).map(
+  const owners: OwnerRow[] = authList.map(
     (u: {
       id: string;
       email?: string;

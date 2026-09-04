@@ -2,8 +2,9 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import { createServiceClient } from "@/lib/supabase/service";
 import { redirect } from "next/navigation";
+import { getOrgBySlug } from "@/lib/data/orgs";
+import { getCurrentUser, getMembershipForOrg } from "@/lib/data/session";
 
 export async function logoutAction(slug: string) {
   const supabase = await createClient();
@@ -12,30 +13,19 @@ export async function logoutAction(slug: string) {
 }
 
 async function requireOrg(slug: string) {
-  const supabase = await createClient();
-  const { data: org } = await supabase.from("organizations").select("id").eq("slug", slug).single();
+  const org = await getOrgBySlug(slug);
   if (!org) throw new Error("Organización no encontrada");
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) throw new Error("No autenticado");
 
-  const { data: membership } = await supabase
-    .from("memberships")
-    .select("role")
-    .eq("org_id", org.id as string)
-    .eq("user_id", user.id)
-    .eq("status", "active")
-    .single();
+  const role = await getMembershipForOrg(org.id, user.id);
 
-  const isPlatformOwner = user.app_metadata?.is_platform_owner === true;
-
-  if (!isPlatformOwner && (!membership || membership.role !== "condo_admin")) {
+  if (!user.isPlatformOwner && role !== "condo_admin") {
     throw new Error("Sin permisos");
   }
 
-  return { orgId: org.id as string, userId: user.id };
+  return { orgId: org.id, userId: user.id };
 }
 
 // ============== CONTACTOS ==============
@@ -113,21 +103,30 @@ export async function deleteCategoryAction(slug: string, categoryId: string) {
 export async function updateSecurityCodeAction(slug: string, newCode: string) {
   const { orgId } = await requireOrg(slug);
   const supabase = await createClient();
-  // Actualizar hash con crypt de Postgres
-  const { error } = await supabase.rpc("set_security_code", {
+  // Actualizar hash con crypt de Postgres. update_org_security_code es
+  // SECURITY DEFINER, por lo que no necesita el fallback de service_role.
+  const { error } = await supabase.rpc("update_org_security_code", {
     p_org_id: orgId,
     p_code: newCode,
   });
   if (error) {
-    // Fallback: usar service_role para bypassear si RLS bloquea
-    const svc = createServiceClient();
-    const { error: err2 } = await svc.rpc("set_security_code", {
-      p_org_id: orgId,
-      p_code: newCode,
-    });
-    if (err2) throw err2;
+    console.warn(
+      "[updateSecurityCodeAction] fallo al guardar código de seguridad:",
+      error.message,
+    );
+    throw error;
   }
   revalidatePath(`/o/${slug}/panel/codigo-seguridad`);
+}
+
+export async function getSecurityCodeAction(slug: string) {
+  const { orgId } = await requireOrg(slug);
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("get_org_security_code", {
+    p_org_id: orgId,
+  });
+  if (error) throw error;
+  return (data as string) ?? null;
 }
 
 // ============== BRANDING ==============

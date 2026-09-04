@@ -4,6 +4,7 @@ import { Building2, Users, ChevronRight, CalendarClock } from "lucide-react";
 import { createServiceClient } from "@/lib/supabase/service";
 import { OrgHeader } from "./OrgHeader";
 import { ToastContainer } from "@/components/ui/Toast";
+import { listAllMemberships } from "@/lib/data/superadmin";
 
 interface OrgRow {
   id: string;
@@ -44,18 +45,14 @@ export default async function SuperAdminPage() {
 
   const orgs = (orgsRaw as OrgRow[] | null) ?? [];
 
-  const { data: membersRaw } = await svc
-    .from("memberships")
-    .select("org_id, status");
+  const members = await listAllMemberships();
 
   const memberCountByOrg = new Map<string, number>();
   const activeCountByOrg = new Map<string, number>();
-  if (membersRaw) {
-    for (const m of membersRaw as unknown as Array<{ org_id: string; status: string }>) {
-      memberCountByOrg.set(m.org_id, (memberCountByOrg.get(m.org_id) ?? 0) + 1);
-      if (m.status === "active") {
-        activeCountByOrg.set(m.org_id, (activeCountByOrg.get(m.org_id) ?? 0) + 1);
-      }
+  for (const m of members) {
+    memberCountByOrg.set(m.org_id, (memberCountByOrg.get(m.org_id) ?? 0) + 1);
+    if (m.status === "active") {
+      activeCountByOrg.set(m.org_id, (activeCountByOrg.get(m.org_id) ?? 0) + 1);
     }
   }
 
