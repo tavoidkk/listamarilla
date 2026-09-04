@@ -1,11 +1,12 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Phone } from "lucide-react";
 import { StarRating } from "@/components/ui/StarRating";
 
 export interface ContactItem {
   id: string;
   name: string;
+  phone: string;
   category_emoji: string | null;
   category_label: string | null;
   avg_rating: number;
@@ -36,6 +37,10 @@ export function ContactCard({ contact, onTap }: ContactCardProps) {
           <p className="mb-1 truncate text-base font-bold text-slate-900">{contact.name}</p>
           <p className="truncate text-sm text-slate-500">
             {contact.category_label ?? "Servicio"}
+          </p>
+          <p className="mt-1 flex items-center gap-1 truncate text-sm font-semibold text-slate-700">
+            <Phone className="h-3.5 w-3.5 flex-shrink-0 text-slate-400" aria-hidden />
+            {contact.phone}
           </p>
         </div>
         <span

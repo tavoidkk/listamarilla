@@ -23,7 +23,7 @@ const VARIANTS: Record<ButtonVariant, string> = {
   ghost:
     "bg-transparent text-slate-600 hover:bg-slate-100 active:scale-95 focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:outline-none",
   danger: "bg-danger text-white hover:brightness-110 active:scale-95 font-semibold focus:ring-2 focus:ring-danger focus:ring-offset-2 focus:outline-none",
-  whatsapp: "bg-whatsapp text-white hover:bg-whatsapp-dark active:scale-95 font-semibold focus:ring-2 focus:ring-whatsapp focus:ring-offset-2 focus:outline-none",
+  whatsapp: "bg-[#25D366] text-white hover:bg-[#128C7E] active:scale-95 font-semibold focus:ring-2 focus:ring-[#25D366] focus:ring-offset-2 focus:outline-none",
 };
 
 const SIZES: Record<ButtonSize, string> = {

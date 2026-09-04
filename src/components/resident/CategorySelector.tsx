@@ -17,13 +17,21 @@ interface CategorySelectorProps {
   onAddClick: () => void;
 }
 
+function normalizeText(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
 export function CategorySelector({ categories, orgName, onSelect, onAddClick }: CategorySelectorProps) {
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = normalizeText(query);
     if (!q) return categories;
-    return categories.filter((c) => c.label.toLowerCase().includes(q));
+    return categories.filter((c) => normalizeText(c.label).includes(q));
   }, [categories, query]);
 
   return (
@@ -34,20 +42,20 @@ export function CategorySelector({ categories, orgName, onSelect, onAddClick }: 
           className="absolute inset-0 opacity-[0.12] bg-[radial-gradient(ellipse_at_top_right,_#fff_0%,_transparent_55%)]"
         />
         <div className="relative">
-          <p className="mb-1 text-center text-xs font-extrabold uppercase tracking-[0.35em] text-amber-900/80">
+          <p className="mb-1 text-center text-xs font-extrabold uppercase tracking-[0.35em] text-black">
             LISTAMARILLA
           </p>
           {orgName ? (
-            <p className="mb-3 text-center text-xs font-semibold text-amber-900/50">{orgName}</p>
+            <p className="mb-3 text-center text-xs font-semibold text-orange-500/100">{orgName}</p>
           ) : null}
-          <h1 className="mb-5 text-center text-3xl font-black tracking-tight text-slate-900 md:text-4xl drop-shadow-sm">
+          <h1 className="mb-5 text-center text-3xl font-black tracking-tight text-slate-850 md:text-4xl drop-shadow-sm">
             ¿Qué servicio necesitas?
           </h1>
 
           <div className="relative mx-auto max-w-md">
             <Search className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-400" />
             <input
-              type="search"
+              type="text"
               placeholder="Buscar plomería, electricista, pintura..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}

@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --color-star-filled: #fbbf24;
+  --color-star-empty: #0f172a;
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;

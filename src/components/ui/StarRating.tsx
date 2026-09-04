@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 interface StarRatingProps {
   value: number;
   count?: number;
@@ -71,11 +73,19 @@ const RATING_LABELS: Record<number, string> = {
 };
 
 export function InteractiveStarRating({ value, onChange, disabled }: InteractiveStarRatingProps) {
+  const [hovered, setHovered] = useState(0);
+  const effective = hovered || value;
+
   return (
     <div className="flex flex-col items-center gap-2">
-      <div className="flex items-center gap-2" role="radiogroup" aria-label="Calificación">
+      <div
+        className="flex items-center gap-2"
+        role="radiogroup"
+        aria-label="Calificación"
+        onMouseLeave={() => setHovered(0)}
+      >
         {[1, 2, 3, 4, 5].map((n) => {
-          const isActive = value >= n;
+          const isActive = effective >= n;
           return (
             <button
               key={n}
@@ -84,6 +94,8 @@ export function InteractiveStarRating({ value, onChange, disabled }: Interactive
               aria-checked={value === n}
               disabled={disabled}
               onClick={() => onChange(n)}
+              onMouseEnter={() => setHovered(n)}
+              onFocus={() => setHovered(n)}
               className="bg-transparent p-1 transition-transform hover:scale-110 active:scale-95 disabled:cursor-not-allowed"
             >
               <svg width={42} height={42} viewBox="0 0 24 24" aria-hidden>
@@ -97,7 +109,7 @@ export function InteractiveStarRating({ value, onChange, disabled }: Interactive
         })}
       </div>
       <p className="h-[22px] text-sm font-semibold text-primary">
-        {value > 0 ? RATING_LABELS[value] : ""}
+        {effective > 0 ? RATING_LABELS[effective] : ""}
       </p>
     </div>
   );

@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useOptimistic, startTransition } from "react";
 import { Disclaimer } from "@/components/resident/Disclaimer";
 import { CategorySelector } from "@/components/resident/CategorySelector";
 import { ContactList, type ContactItem } from "@/components/resident/ContactList";
-import { ContactDetailModal, type ContactDetail } from "@/components/resident/ContactDetailModal";
+import { ContactDetailModal, type ContactDetail, type VotePayload } from "@/components/resident/ContactDetailModal";
 import {
   RegisterModal,
   type CategoryOption,
@@ -32,6 +32,18 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
   const [registerOpen, setRegisterOpen] = useState(false);
   const [detailContact, setDetailContact] = useState<ContactDetail | null>(null);
   const [alreadyVoted, setAlreadyVoted] = useState(false);
+
+  // Estado optimista: el voto se refleja al instante en la lista de contactos
+  // antes de que el RPC confirme el nuevo promedio.
+  const [optimisticContacts, reduceContacts] = useOptimistic(
+    contacts,
+    (state: ContactItem[], action: { id: string; avg_rating: number; rating_count: number }) =>
+      state.map((c) =>
+        c.id === action.id
+          ? { ...c, avg_rating: action.avg_rating, rating_count: action.rating_count }
+          : c,
+      ),
+  );
 
   // Hidratar el estado del disclaimer desde sessionStorage SOLO en cliente
   useEffect(() => {
@@ -67,7 +79,7 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
       const supabase = createClient();
       const { data, error } = await supabase
         .from("contacts")
-        .select("id, name, category_emoji, category_label, avg_rating, rating_count, added_by_name")
+        .select("id, name, phone, category_emoji, category_label, avg_rating, rating_count, added_by_name")
         .eq("org_id", orgId)
         .eq("category_id", category.id)
         .order("avg_rating", { ascending: false });
@@ -104,6 +116,14 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
       floor: number | null;
       apartment: string | null;
     };
+
+    const { data: reviewsRaw } = await supabase
+      .from("votes")
+      .select("id, voter_name, floor, apartment, comment, rating, created_at")
+      .eq("contact_id", contact.id)
+      .order("created_at", { ascending: false })
+      .limit(10);
+
     setDetailContact({
       id: d.id,
       name: d.name,
@@ -115,19 +135,9 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
       added_by_name: d.added_by_name,
       floor: d.floor,
       apartment: d.apartment,
+      reviews: (reviewsRaw as ContactDetail["reviews"] | null) ?? [],
     });
-    const sessionId = getSessionId();
-    if (sessionId) {
-      const { data: vote } = await supabase
-        .from("votes")
-        .select("id")
-        .eq("contact_id", contact.id)
-        .eq("session_id", sessionId)
-        .maybeSingle();
-      setAlreadyVoted(Boolean(vote));
-    } else {
-      setAlreadyVoted(false);
-    }
+    setAlreadyVoted(false);
   }
 
   function handleAcceptDisclaimer() {
@@ -178,41 +188,68 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
     }
   }
 
-  async function handleVote(rating: number) {
+  async function handleVote(vote: VotePayload) {
     if (!detailContact) return;
     const sessionId = getSessionId();
     if (!sessionId) throw new Error("No se pudo identificar la sesión del navegador");
 
-    const supabase = createClient();
-    const { data, error } = await supabase.rpc("submit_vote", {
-      p_contact_id: detailContact.id,
-      p_session_id: sessionId,
-      p_rating: rating,
-    });
-    if (error) throw error;
+    // Reflejo optimista del voto dentro de la transición (calculando el nuevo promedio).
+    const newCount = detailContact.rating_count + 1;
+    const newAvg = (detailContact.avg_rating * detailContact.rating_count + vote.rating) / newCount;
 
-    if (!data) return;
-    const updated = data as unknown as ContactDetail;
-    setDetailContact((prev) =>
-      prev
-        ? {
-            ...prev,
-            avg_rating: Number(updated.avg_rating),
-            rating_count: updated.rating_count,
-          }
-        : prev,
-    );
-    setContacts((prev) =>
-      prev.map((c) =>
-        c.id === updated.id
-          ? {
-              ...c,
-              avg_rating: Number(updated.avg_rating),
-              rating_count: updated.rating_count,
-            }
-          : c,
-      ),
-    );
+    let submit: Promise<void> | undefined;
+    startTransition(() => {
+      reduceContacts({ id: detailContact.id, avg_rating: newAvg, rating_count: newCount });
+      submit = (async () => {
+        const supabase = createClient();
+        const { data, error } = await supabase.rpc("submit_vote", {
+          p_contact_id: detailContact.id,
+          p_session_id: sessionId,
+          p_rating: vote.rating,
+          p_voter_name: vote.voterName,
+          p_floor: vote.floor,
+          p_apartment: vote.apartment,
+          p_comment: vote.comment,
+        });
+        if (error) throw error;
+        if (!data) return;
+        const updated = data as unknown as ContactDetail;
+        setDetailContact((prev) =>
+          prev
+            ? {
+                ...prev,
+                avg_rating: Number(updated.avg_rating),
+                rating_count: updated.rating_count,
+                reviews: [
+                  {
+                    id: crypto.randomUUID(),
+                    voter_name: vote.voterName,
+                    floor: vote.floor,
+                    apartment: vote.apartment,
+                    comment: vote.comment ?? null,
+                    rating: vote.rating,
+                    created_at: new Date().toISOString(),
+                  },
+                  ...(prev.reviews ?? []),
+                ].slice(0, 10),
+              }
+            : prev,
+        );
+        setContacts((prev) =>
+          prev.map((c) =>
+            c.id === updated.id
+              ? {
+                  ...c,
+                  avg_rating: Number(updated.avg_rating),
+                  rating_count: updated.rating_count,
+                }
+              : c,
+          ),
+        );
+      })();
+    });
+
+    await submit;
     setAlreadyVoted(true);
   }
 
@@ -254,7 +291,7 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
           ←
         </button>
         <div className="flex flex-1 flex-col items-center gap-0.5 text-center">
-          <p className="text-xs font-bold uppercase tracking-wider text-amber-900/80">{orgName}</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-black">{orgName}</p>
           <p className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-900">
             <span aria-hidden>{selectedCategory.emoji}</span>
             {selectedCategory.label}
@@ -264,7 +301,7 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
       </header>
 
       <ContactList
-        contacts={contacts}
+        contacts={optimisticContacts}
         loading={contactsLoading}
         onCardTap={loadContactDetail}
         onAddClick={() => setRegisterOpen(true)}
@@ -290,8 +327,10 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
       />
 
       <ContactDetailModal
+        key={detailContact?.id ?? "none"}
         open={detailContact !== null}
         contact={detailContact}
+        orgId={orgId}
         alreadyVoted={alreadyVoted}
         onClose={() => setDetailContact(null)}
         onSubmitVote={handleVote}

@@ -43,8 +43,8 @@ export function Modal({
 
   const containerClass =
     variant === "bottom"
-      ? "flex items-end justify-center sm:items-center"
-      : "flex items-center justify-center p-4";
+      ? "flex w-full items-end justify-center sm:items-center"
+      : "flex w-full items-center justify-center p-4";
 
   return (
     <div
