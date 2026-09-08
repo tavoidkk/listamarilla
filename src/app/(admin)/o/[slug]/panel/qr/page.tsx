@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { QRDisplay } from "./QRDisplay";
 import { PageHeader } from "@/components/admin/PageBits";
 import { getOrgBySlug } from "@/lib/data/orgs";
@@ -15,12 +14,6 @@ export default async function QRPage({ params }: { params: Promise<{ slug: strin
     <div>
       <PageHeader title="QR para vecinos" subtitle="Imprime y pega en el lobby, ascensor o cartelera." backHref={`/o/${slug}/panel`} />
       <QRDisplay url={url} name={org.name} />
-      <Link
-        href={`/o/${slug}/panel`}
-        className="mt-6 inline-block text-sm font-semibold text-primary-dark hover:underline"
-      >
-        ← Volver al panel
-      </Link>
     </div>
   );
 }

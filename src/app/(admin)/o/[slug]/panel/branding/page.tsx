@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { BrandingEditor } from "./BrandingEditor";
 import { PageHeader } from "@/components/admin/PageBits";
 import { getOrgBySlug } from "@/lib/data/orgs";
@@ -21,12 +20,6 @@ export default async function BrandingPage({ params }: { params: Promise<{ slug:
           background_url: o.background_url ?? null,
         }}
       />
-      <Link
-        href={`/o/${slug}/panel`}
-        className="mt-6 inline-block text-sm font-semibold text-primary-dark hover:underline"
-      >
-        ← Volver al panel
-      </Link>
     </div>
   );
 }

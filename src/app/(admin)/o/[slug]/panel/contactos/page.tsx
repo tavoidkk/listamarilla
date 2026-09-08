@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { deleteContactAction } from "../actions";
 import { PageHeader, EmptyState } from "@/components/admin/PageBits";
@@ -63,13 +62,6 @@ export default async function ContactsAdminPage({ params }: { params: Promise<{ 
           desc="Los vecinos pueden agregarlos desde el portal escaneando el QR."
         />
       )}
-
-      <Link
-        href={`/o/${slug}/panel`}
-        className="mt-6 inline-block text-sm font-semibold text-primary-dark hover:underline"
-      >
-        ← Volver al panel
-      </Link>
     </div>
   );
 }
