@@ -76,7 +76,7 @@ export default function MarketingHome() {
                   <svg className="h-4 w-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  $150 al año, todo incluido
+                  $100 al año, todo incluido
                 </p>
               </div>
 
@@ -396,11 +396,11 @@ export default function MarketingHome() {
                     Plan anual
                   </div>
                   <div className="mt-2 mb-3 flex items-baseline justify-center gap-1">
-                    <span className="text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900">$150</span>
+                    <span className="text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900">$100</span>
                     <span className="text-lg text-slate-500">/año</span>
                   </div>
                   <p className="mb-6 text-center text-sm text-slate-500">
-                    Equivale a $12.50 al mes. Menos que una cuota de mantenimiento.
+                    Equivale a $8.33 al mes. Menos que una cuota de mantenimiento.
                   </p>
                   <ul className="mb-6 space-y-2.5 text-left">
                     <li className="flex items-start gap-2">
