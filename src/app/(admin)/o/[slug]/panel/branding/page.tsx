@@ -11,7 +11,7 @@ export default async function BrandingPage({ params }: { params: Promise<{ slug:
 
   return (
     <div>
-      <PageHeader title="Branding" subtitle="Sube una foto de tu edificio como fondo del directorio." backHref={`/o/${slug}/panel`} />
+      <PageHeader title="Imagen del edificio" subtitle="Sube una foto de tu edificio como fondo del directorio." backHref={`/o/${slug}/panel`} />
       <BrandingEditor
         slug={slug}
         orgId={o.id}

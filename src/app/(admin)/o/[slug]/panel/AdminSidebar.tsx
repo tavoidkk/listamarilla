@@ -15,7 +15,7 @@ const NAV_ITEMS = [
   { href: "/categorias", label: "Categorías", emoji: "🏷️" },
   { href: "/configuracion", label: "Configuración", emoji: "⚙️" },
   { href: "/codigo-seguridad", label: "Código", emoji: "🔐" },
-  { href: "/branding", label: "Branding", emoji: "🎨" },
+  { href: "/branding", label: "Imagen", emoji: "🖼️" },
   { href: "/qr", label: "QR vecinos", emoji: "📱" },
 ];
 
@@ -56,14 +56,6 @@ export function AdminSidebar({ slug, orgName }: AdminSidebarProps) {
             </Link>
           ))}
         </nav>
-        <Link
-          href={`/o/${slug}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-4 flex items-center justify-center gap-2 rounded-xl border border-border bg-white px-3 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-primary-light"
-        >
-          👁 Ver portal vecinos
-        </Link>
       </aside>
 
       <nav

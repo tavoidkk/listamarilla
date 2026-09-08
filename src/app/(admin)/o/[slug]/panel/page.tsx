@@ -38,14 +38,24 @@ export default async function AdminDashboardPage({ params }: { params: Promise<{
           <h1 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">{o.name}</h1>
           <p className="mt-1 text-sm text-muted-foreground">Resumen general del directorio de tu edificio.</p>
         </div>
-        <form action={logoutAction.bind(null, slug)}>
-          <button
-            type="submit"
-            className="rounded-xl border border-border bg-white px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-surface"
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href={`/o/${slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-xl border border-amber-400 bg-amber-400 px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition-colors hover:bg-amber-500 hover:shadow-md"
           >
-            Cerrar sesión
-          </button>
-        </form>
+            👁 Ver portal vecinos
+          </Link>
+          <form action={logoutAction.bind(null, slug)}>
+            <button
+              type="submit"
+              className="rounded-xl border border-border bg-white px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-surface"
+            >
+              Cerrar sesión
+            </button>
+          </form>
+        </div>
       </div>
 
       <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -64,7 +74,7 @@ export default async function AdminDashboardPage({ params }: { params: Promise<{
           <NavLink href={`/o/${slug}/panel/categorias`} emoji="🏷️" title="Gestionar categorías" desc="Agregar o quitar" />
           <NavLink href={`/o/${slug}/panel/configuracion`} emoji="⚙️" title="Configuración del edificio" desc="Pisos y apartamentos" />
           <NavLink href={`/o/${slug}/panel/codigo-seguridad`} emoji="🔐" title="Código de seguridad" desc="Para vecinos" />
-          <NavLink href={`/o/${slug}/panel/branding`} emoji="🎨" title="Branding del edificio" desc="Colores y logo" />
+          <NavLink href={`/o/${slug}/panel/branding`} emoji="🖼️" title="Cambiar imagen" desc="Foto de fondo y nombre" />
           <NavLink href={`/o/${slug}/panel/qr`} emoji="📱" title="Generar QR imprimible" desc="Para el lobby" />
         </div>
       </section>
