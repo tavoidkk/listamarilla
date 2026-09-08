@@ -1,13 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import { Check, Copy, Phone } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
-import { Field } from "@/components/ui/Field";
 import { StarRating, InteractiveStarRating } from "@/components/ui/StarRating";
-import { Check, Copy, Phone } from "lucide-react";
 import { toast } from "@/components/ui/Toast";
-import { createClient } from "@/lib/supabase/client";
 
 export interface VoteReview {
   id: string;
@@ -33,97 +31,59 @@ export interface ContactDetail {
   reviews: VoteReview[];
 }
 
-export type VotePayload = {
-  rating: number;
-  voterName: string;
-  floor: number;
-  apartment: string;
-  comment?: string;
-};
-
 interface ContactDetailModalProps {
   open: boolean;
   contact: ContactDetail | null;
-  orgId: string;
   alreadyVoted: boolean;
   onClose: () => void;
-  onSubmitVote: (vote: VotePayload) => Promise<void>;
+  onSubmitVote: (rating: number, comment?: string) => Promise<void>;
 }
 
-interface FloorConfig {
-  total_floors: number;
-  apartment_labels: string[];
-  special_floor_labels: Record<string, number>;
+function getErrorMessage(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  if (typeof err === "object" && err !== null && "message" in err) {
+    const m = (err as { message?: unknown }).message;
+    if (typeof m === "string" && m.trim()) return m;
+  }
+  if (typeof err === "string" && err.trim()) return err;
+  return "No se pudo registrar la calificación. Inténtalo de nuevo.";
 }
-
-const DEFAULT_FLOORS: FloorConfig = {
-  total_floors: 13,
-  apartment_labels: ["A", "B", "C"],
-  special_floor_labels: {},
-};
-
-const NAME_REGEX = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/;
 
 export function ContactDetailModal({
   open,
   contact,
-  orgId,
-  alreadyVoted: alreadyVotedProp,
+  alreadyVoted,
   onClose,
   onSubmitVote,
 }: ContactDetailModalProps) {
   const [rating, setRating] = useState(0);
-  const [voterName, setVoterName] = useState("");
-  const [floor, setFloor] = useState("");
-  const [apartment, setApartment] = useState("");
   const [comment, setComment] = useState("");
-  const [alreadyVoted, setAlreadyVoted] = useState(alreadyVotedProp);
   const [submitting, setSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [floorConfig, setFloorConfig] = useState<FloorConfig>(DEFAULT_FLOORS);
-  const floorConfigLoadedRef = useRef(false);
-
-  useEffect(() => {
-    if (!open) return;
-    if (!floorConfigLoadedRef.current) {
-      floorConfigLoadedRef.current = true;
-      const supabase = createClient();
-      void supabase
-        .from("org_floor_config")
-        .select("total_floors, apartment_labels, special_floor_labels")
-        .eq("org_id", orgId)
-        .maybeSingle()
-        .then(({ data }) => {
-          if (data) {
-            setFloorConfig({
-              total_floors: (data as { total_floors: number }).total_floors,
-              apartment_labels: (data as { apartment_labels: string[] }).apartment_labels,
-              special_floor_labels:
-                ((data as { special_floor_labels: Record<string, number> }).special_floor_labels ??
-                  {}) ?? {},
-            });
-          }
-        });
-    }
-  }, [open, orgId]);
+  const [voted, setVoted] = useState(alreadyVoted);
 
   if (!contact) return null;
 
   const currentContact = contact;
   const wa = `https://wa.me/${contact.phone.replace(/\D/g, "")}`;
 
-  const numberedFloors = Array.from({ length: floorConfig.total_floors }, (_, i) => i + 1);
-  const voteFloorOptions = numberedFloors.map((f) => ({ value: String(f), label: String(f) }));
-
-  function setError(field: string, msg: string) {
-    setErrors((p) => {
-      if (!msg) {
-        const { [field]: _, ...rest } = p;
-        return rest;
+  async function handleVote(value: number, text?: string) {
+    if (submitting || value === 0) return;
+    setSubmitting(true);
+    setRating(value);
+    try {
+      await onSubmitVote(value, text?.trim() || undefined);
+      setVoted(true);
+      toast({ kind: "success", message: "¡Gracias por tu calificación!" });
+    } catch (err) {
+      const msg = getErrorMessage(err);
+      if (msg.toLowerCase().includes("ya calificaste")) {
+        setVoted(true);
       }
-      return { ...p, [field]: msg };
-    });
+      toast({ kind: "error", message: msg });
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   async function handleCopy() {
@@ -146,62 +106,6 @@ export function ContactDetailModal({
     }
   }
 
-  async function handleVote() {
-    const next: Record<string, string> = {};
-    if (rating === 0) next.rating = "Selecciona una calificación";
-    if (voterName.trim().length < 3 || !NAME_REGEX.test(voterName)) {
-      next.voterName = "Ingresa tu nombre y apellido (mínimo 3 letras)";
-    }
-    if (!floor) next.floor = "Selecciona tu piso";
-    if (!apartment) next.apartment = "Selecciona tu apartamento";
-    setErrors(next);
-    if (Object.keys(next).length > 0) return;
-
-    const floorNum = Number(floor);
-    const supabase = createClient();
-
-    // Un solo voto por unidad (piso + apt): verificar antes de enviar.
-    const { data: existing } = await supabase
-      .from("votes")
-      .select("id")
-      .eq("contact_id", currentContact.id)
-      .eq("floor", floorNum)
-      .eq("apartment", apartment)
-      .maybeSingle();
-
-    if (existing) {
-      setAlreadyVoted(true);
-      toast({ kind: "error", message: "Este piso/apartamento ya calificó a este contacto" });
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      await onSubmitVote({
-        rating,
-        voterName: voterName.trim(),
-        floor: floorNum,
-        apartment: apartment.trim(),
-        comment: comment.trim() || undefined,
-      });
-      setAlreadyVoted(true);
-      setRating(0);
-      setVoterName("");
-      setFloor("");
-      setApartment("");
-      setComment("");
-      toast({ kind: "success", message: "¡Gracias por tu calificación!" });
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Error al registrar voto";
-      if (msg.includes("Ya calificaste") || msg.includes("piso/apartamento")) {
-        setAlreadyVoted(true);
-      }
-      toast({ kind: "error", message: msg });
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
   return (
     <Modal open={open} onClose={onClose} variant="center" ariaLabel="Detalle de contacto">
       <div className="mb-5 text-center">
@@ -211,7 +115,7 @@ export function ContactDetailModal({
         >
           {contact.category_emoji ?? "🔧"}
         </div>
-        <h2 className="mb-2 break-words text-2xl font-bold text-foreground">{contact.name}</h2>
+        <h2 className="mb-2 break-words text-2xl font-bold text-black">{contact.name}</h2>
         <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-light px-4 py-1.5 text-sm font-semibold text-primary-dark">
           {contact.category_emoji ?? "🛠️"} {contact.category_label ?? "Servicio"}
         </span>
@@ -255,7 +159,7 @@ export function ContactDetailModal({
         {contact.added_by_name ? (
           <div className="flex items-center justify-between gap-4 text-sm">
             <span className="text-muted-foreground">Recomendado por</span>
-            <span className="text-right font-medium text-foreground">
+            <span className="text-right font-medium text-black">
               {contact.added_by_name}
               {contact.floor || contact.apartment ? (
                 <span className="block text-xs text-muted-foreground">
@@ -277,109 +181,64 @@ export function ContactDetailModal({
           {contact.reviews.map((r) => (
             <div key={r.id} className="rounded-xl bg-surface p-3">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-semibold text-foreground">{r.voter_name}</span>
+                <span className="text-sm font-semibold text-black">
+                  {r.voter_name ?? "Vecino anónimo"}
+                </span>
                 <span className="text-xs text-muted-foreground">
-                  {r.floor != null ? `Piso ${r.floor} · Apt ${r.apartment ?? "—"}` : "Vecino"}
+                  {r.floor != null ? `Piso ${r.floor} · Apt ${r.apartment ?? "—"}` : ""}
                 </span>
               </div>
               <div className="mt-1 flex items-center gap-2">
                 <StarRating value={r.rating} size="sm" />
+                {r.comment ? <span className="text-xs text-muted-foreground">·</span> : null}
               </div>
-              {r.comment ? (
-                <p className="mt-1 text-sm text-muted-foreground">{r.comment}</p>
-              ) : null}
+              {r.comment ? <p className="mt-1 text-sm text-muted-foreground">{r.comment}</p> : null}
             </div>
           ))}
         </div>
       ) : null}
 
-      {alreadyVoted ? (
+      {voted ? (
         <div className="mt-5 rounded-xl bg-success-bg p-3 text-center text-sm font-semibold text-success">
-          ✓ Ya calificaste este contacto desde tu piso/apartamento
+          ✓ Ya calificaste este contacto
         </div>
       ) : (
-        <div className="mt-5 space-y-4">
-          <div>
-            <p className="mb-3 text-center text-sm font-semibold text-muted-foreground">
-              ¿Cómo te fue?
-            </p>
-            <InteractiveStarRating value={rating} onChange={setRating} disabled={submitting} />
-            {errors.rating ? (
-              <p className="mt-1 text-center text-[13px] font-medium text-danger">{errors.rating}</p>
-            ) : null}
-          </div>
-
+        <div className="mt-5 text-center">
+          <p className="mb-3 text-sm font-semibold text-muted-foreground">¿Cómo te fue?</p>
+          <InteractiveStarRating
+            value={rating}
+            onChange={(n) => {
+              setRating(n);
+              setComment("");
+              setCopied(false);
+            }}
+            disabled={submitting}
+          />
           {rating > 0 ? (
-            <>
-              <Field
-                id="voter-name"
-                label="Tu nombre y apellido"
-                placeholder="Ej: María García"
-                autoComplete="name"
-                value={voterName}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  setVoterName(v);
-                  setError("voterName", v && !NAME_REGEX.test(v) ? "Solo letras y espacios" : "");
-                }}
-                disabled={submitting}
-                error={errors.voterName}
-              />
-
-              <div className="grid grid-cols-2 gap-3">
-                <Field
-                  as="select"
-                  id="vote-floor"
-                  label="Tu piso"
-                  value={floor}
-                  onChange={(e) => setFloor(e.target.value)}
-                  disabled={submitting}
-                  error={errors.floor}
-                  options={[
-                    { value: "", label: "Piso" },
-                    ...voteFloorOptions,
-                  ]}
-                />
-                <Field
-                  as="select"
-                  id="vote-apartment"
-                  label="Apartamento"
-                  value={apartment}
-                  onChange={(e) => setApartment(e.target.value)}
-                  disabled={submitting}
-                  error={errors.apartment}
-                  options={[
-                    { value: "", label: "Apt" },
-                    ...floorConfig.apartment_labels.map((a) => ({ value: a, label: a })),
-                  ]}
-                />
-              </div>
-
-              <Field
-                as="textarea"
+            <div className="mt-4 space-y-3 text-left">
+              <textarea
                 id="vote-comment"
-                label="Comentario"
-                optional
                 placeholder="Cuéntale a tus vecinos cómo te fue (opcional)"
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 disabled={submitting}
                 maxLength={280}
+                rows={3}
+                className="w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/30"
               />
-
               <Button
                 variant="primary"
                 size="lg"
-                onClick={() => void handleVote()}
+                onClick={() => void handleVote(rating, comment)}
                 loading={submitting}
                 fullWidth
               >
                 Enviar calificación
               </Button>
               <p className="text-center text-xs text-muted-foreground">
-                Solo se permite una calificación por piso y apartamento.
+                Voto anónimo · un voto por navegador
               </p>
-            </>
+            </div>
           ) : null}
         </div>
       )}

@@ -35,7 +35,7 @@ export function CategorySelector({ categories, orgName, onSelect, onAddClick }: 
   }, [categories, query]);
 
   return (
-    <div className="flex w-full min-h-screen flex-col bg-white">
+    <div className="flex w-full min-h-screen flex-col bg-transparent">
       <header className="relative overflow-hidden bg-amber-400 px-6 pb-8 pt-10 md:pt-12 shadow-md">
         <div
           aria-hidden

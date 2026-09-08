@@ -4,7 +4,7 @@ import { useEffect, useState, useOptimistic, startTransition } from "react";
 import { Disclaimer } from "@/components/resident/Disclaimer";
 import { CategorySelector } from "@/components/resident/CategorySelector";
 import { ContactList, type ContactItem } from "@/components/resident/ContactList";
-import { ContactDetailModal, type ContactDetail, type VotePayload } from "@/components/resident/ContactDetailModal";
+import { ContactDetailModal, type ContactDetail } from "@/components/resident/ContactDetailModal";
 import {
   RegisterModal,
   type CategoryOption,
@@ -137,7 +137,19 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
       apartment: d.apartment,
       reviews: (reviewsRaw as ContactDetail["reviews"] | null) ?? [],
     });
-    setAlreadyVoted(false);
+
+    const sessionId = getSessionId();
+    if (sessionId) {
+      const { data: vote } = await supabase
+        .from("votes")
+        .select("id")
+        .eq("contact_id", contact.id)
+        .eq("session_id", sessionId)
+        .maybeSingle();
+      setAlreadyVoted(Boolean(vote));
+    } else {
+      setAlreadyVoted(false);
+    }
   }
 
   function handleAcceptDisclaimer() {
@@ -188,14 +200,15 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
     }
   }
 
-  async function handleVote(vote: VotePayload) {
+  async function handleVote(rating: number, comment?: string) {
     if (!detailContact) return;
     const sessionId = getSessionId();
     if (!sessionId) throw new Error("No se pudo identificar la sesión del navegador");
 
     // Reflejo optimista del voto dentro de la transición (calculando el nuevo promedio).
+    const voteComment = comment?.trim() || null;
     const newCount = detailContact.rating_count + 1;
-    const newAvg = (detailContact.avg_rating * detailContact.rating_count + vote.rating) / newCount;
+    const newAvg = (detailContact.avg_rating * detailContact.rating_count + rating) / newCount;
 
     let submit: Promise<void> | undefined;
     startTransition(() => {
@@ -205,11 +218,8 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
         const { data, error } = await supabase.rpc("submit_vote", {
           p_contact_id: detailContact.id,
           p_session_id: sessionId,
-          p_rating: vote.rating,
-          p_voter_name: vote.voterName,
-          p_floor: vote.floor,
-          p_apartment: vote.apartment,
-          p_comment: vote.comment,
+          p_rating: rating,
+          p_comment: voteComment ?? undefined,
         });
         if (error) throw error;
         if (!data) return;
@@ -223,11 +233,11 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
                 reviews: [
                   {
                     id: crypto.randomUUID(),
-                    voter_name: vote.voterName,
-                    floor: vote.floor,
-                    apartment: vote.apartment,
-                    comment: vote.comment ?? null,
-                    rating: vote.rating,
+                    voter_name: null,
+                    floor: null,
+                    apartment: null,
+                    comment: voteComment,
+                    rating,
                     created_at: new Date().toISOString(),
                   },
                   ...(prev.reviews ?? []),
@@ -330,7 +340,6 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
         key={detailContact?.id ?? "none"}
         open={detailContact !== null}
         contact={detailContact}
-        orgId={orgId}
         alreadyVoted={alreadyVoted}
         onClose={() => setDetailContact(null)}
         onSubmitVote={handleVote}

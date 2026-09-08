@@ -9,7 +9,7 @@ interface DisclaimerProps {
 
 export function Disclaimer({ orgName, onAccept }: DisclaimerProps) {
   return (
-    <div className="app-fade flex min-h-screen w-full flex-col items-center justify-center bg-white px-6 py-12 text-center">
+    <div className="app-fade flex min-h-screen w-full flex-col items-center justify-center bg-white/80 backdrop-blur-sm px-6 py-12 text-center">
       <div
         className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-primary text-primary-foreground shadow-lg animate-[scaleIn_0.4s_ease]"
         aria-hidden

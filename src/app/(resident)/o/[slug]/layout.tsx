@@ -24,8 +24,17 @@ export default async function ResidentLayout({ children, params }: LayoutProps) 
   const cssVars = themeToCssVars(org.theme as Record<string, string>);
 
   return (
-    <div className="bg-white" style={cssVars}>
-      <div className="app-shell app-container app-fade">{children}</div>
+    <div className="min-h-screen bg-white" style={cssVars}>
+      {org.background_url ? (
+        <div aria-hidden className="fixed inset-0">
+          <div
+            className="h-full w-full bg-cover bg-center"
+            style={{ backgroundImage: `url(${org.background_url})` }}
+          />
+          <div className="absolute inset-0 bg-white/75" />
+        </div>
+      ) : null}
+      <div className="relative z-10 app-shell app-container app-fade">{children}</div>
       <ToastContainer />
     </div>
   );
