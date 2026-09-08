@@ -7,6 +7,7 @@ import { LogOut } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { Button } from "@/components/ui/Button";
 import { createClient } from "@/lib/supabase/client";
+import { resolvePostLoginDestination } from "@/app/(marketing)/login/actions";
 
 const NAV_LINKS = [
   { href: "#features", label: "Funciones" },
@@ -19,6 +20,7 @@ export function MarketingHeader() {
   const router = useRouter();
   const [email, setEmail] = useState<string | null>(null);
   const [isOwner, setIsOwner] = useState(false);
+  const [panelHref, setPanelHref] = useState<string | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
@@ -51,9 +53,26 @@ export function MarketingHeader() {
     await supabase.auth.signOut();
     setEmail(null);
     setIsOwner(false);
+    setPanelHref(null);
     router.replace('/');
     router.refresh();
   };
+
+  // Al estar logueado, resolver la ruta del panel (owner → /superadmin,
+  // condo_admin → /o/{slug}/panel) para mostrar un acceso directo.
+  useEffect(() => {
+    if (!email) return;
+    let cancelled = false;
+    resolvePostLoginDestination()
+      .then((dest) => {
+        if (!cancelled)
+          setPanelHref(dest !== "/solicitar" && dest !== "/login" ? dest : null);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [email]);
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur-md shadow-sm shadow-amber-500/5">
@@ -75,6 +94,14 @@ export function MarketingHeader() {
         <div className="flex items-center gap-4">
           {email ? (
             <>
+              {panelHref && !isOwner ? (
+                <Link
+                  href={panelHref}
+                  className="text-sm font-semibold text-amber-600 transition-colors hover:text-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-400 rounded-lg px-2 py-1"
+                >
+                  Mi panel
+                </Link>
+              ) : null}
               {isOwner ? (
                 <Link
                   href="/superadmin"
