@@ -12,13 +12,12 @@ export default async function BrandingPage({ params }: { params: Promise<{ slug:
 
   return (
     <div>
-      <PageHeader title="Branding" subtitle="Personaliza los colores de tu edificio." backHref={`/o/${slug}/panel`} />
+      <PageHeader title="Branding" subtitle="Sube una foto de tu edificio como fondo del directorio." backHref={`/o/${slug}/panel`} />
       <BrandingEditor
         slug={slug}
+        orgId={o.id}
         initial={{
           name: o.name,
-          theme: o.theme ?? {},
-          logo_url: o.logo_url ?? null,
           background_url: o.background_url ?? null,
         }}
       />
