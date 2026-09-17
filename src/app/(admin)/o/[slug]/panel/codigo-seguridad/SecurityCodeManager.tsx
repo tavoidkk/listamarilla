@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Copy, Check, RefreshCw } from "lucide-react";
+import { Copy, Check, RefreshCw, TriangleAlert } from "lucide-react";
 import { Field } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
 import { toast } from "@/components/ui/Toast";
@@ -103,8 +103,9 @@ export function SecurityCodeManager({ slug, currentCode }: Props) {
         </Button>
       </form>
 
-      <p className="rounded-xl bg-warning-bg px-4 py-3 text-xs text-warning">
-        ⚠ Cambiar el código invalida el anterior. Notifica a los vecinos del nuevo.
+      <p className="flex items-start gap-2 rounded-xl bg-warning-bg px-4 py-3 text-xs text-warning">
+        <TriangleAlert className="h-4 w-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
+        Cambiar el código invalida el anterior. Notifica a los vecinos del nuevo.
       </p>
     </div>
   );

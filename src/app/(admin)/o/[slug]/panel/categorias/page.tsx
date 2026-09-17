@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { Tags } from "lucide-react";
 import { CategoryManager } from "./CategoryManager";
 import { PageHeader, EmptyState } from "@/components/admin/PageBits";
 import { getOrgBySlug } from "@/lib/data/orgs";
@@ -27,7 +28,7 @@ export default async function CategoriesAdminPage({ params }: { params: Promise<
         <CategoryManager slug={slug} categories={list} />
       ) : (
         <EmptyState
-          emoji="🏷️"
+          icon={Tags}
           title="Sin categorías"
           desc="Crea la primera categoría para empezar."
         />

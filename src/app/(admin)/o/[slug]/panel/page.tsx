@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Contact, Tags, Settings, KeyRound, Image, QrCode, Users, Star } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { logoutAction } from "@/app/(admin)/o/[slug]/panel/actions";
 import { getOrgBySlug } from "@/lib/data/orgs";
@@ -59,10 +61,10 @@ export default async function AdminDashboardPage({ params }: { params: Promise<{
       </div>
 
       <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Stat label="Contactos" value={contactRes.count ?? 0} emoji="📇" />
-        <Stat label="Categorías" value={categoryRes.count ?? 0} emoji="🏷️" />
-        <Stat label="Miembros" value={memberRes.count ?? 0} emoji="👥" />
-        <Stat label="Votos totales" value={totalVotes} emoji="⭐" />
+        <Stat label="Contactos" value={contactRes.count ?? 0} icon={Contact} />
+        <Stat label="Categorías" value={categoryRes.count ?? 0} icon={Tags} />
+        <Stat label="Miembros" value={memberRes.count ?? 0} icon={Users} />
+        <Stat label="Votos totales" value={totalVotes} icon={Star} />
       </div>
 
       <section>
@@ -70,24 +72,24 @@ export default async function AdminDashboardPage({ params }: { params: Promise<{
           Acciones rápidas
         </h2>
         <div className="grid gap-3 sm:grid-cols-2">
-          <NavLink href={`/o/${slug}/panel/contactos`} emoji="📇" title="Gestionar contactos" desc="Ver, editar y eliminar" />
-          <NavLink href={`/o/${slug}/panel/categorias`} emoji="🏷️" title="Gestionar categorías" desc="Agregar o quitar" />
-          <NavLink href={`/o/${slug}/panel/configuracion`} emoji="⚙️" title="Configuración del edificio" desc="Pisos y apartamentos" />
-          <NavLink href={`/o/${slug}/panel/codigo-seguridad`} emoji="🔐" title="Código de seguridad" desc="Para vecinos" />
-          <NavLink href={`/o/${slug}/panel/branding`} emoji="🖼️" title="Cambiar imagen" desc="Foto de fondo y nombre" />
-          <NavLink href={`/o/${slug}/panel/qr`} emoji="📱" title="Generar QR imprimible" desc="Para el lobby" />
+          <NavLink href={`/o/${slug}/panel/contactos`} icon={Contact} title="Gestionar contactos" desc="Ver, editar y eliminar" />
+          <NavLink href={`/o/${slug}/panel/categorias`} icon={Tags} title="Gestionar categorías" desc="Agregar o quitar" />
+          <NavLink href={`/o/${slug}/panel/configuracion`} icon={Settings} title="Configuración del edificio" desc="Pisos y apartamentos" />
+          <NavLink href={`/o/${slug}/panel/codigo-seguridad`} icon={KeyRound} title="Código de seguridad" desc="Para vecinos" />
+          <NavLink href={`/o/${slug}/panel/branding`} icon={Image} title="Cambiar imagen" desc="Foto de fondo y nombre" />
+          <NavLink href={`/o/${slug}/panel/qr`} icon={QrCode} title="Generar QR imprimible" desc="Para el lobby" />
         </div>
       </section>
     </div>
   );
 }
 
-function Stat({ label, value, emoji }: { label: string; value: number; emoji: string }) {
+function Stat({ label, value, icon: Icon }: { label: string; value: number; icon: LucideIcon }) {
   return (
     <div className="rounded-2xl border border-border bg-white p-4 transition-colors hover:border-primary">
       <div className="mb-2 flex items-center justify-between">
-        <span aria-hidden className="text-2xl">
-          {emoji}
+        <span aria-hidden className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-light">
+          <Icon className="h-5 w-5 text-amber-500" />
         </span>
         <span className="text-3xl font-bold tracking-tight text-foreground">{value}</span>
       </div>
@@ -96,7 +98,7 @@ function Stat({ label, value, emoji }: { label: string; value: number; emoji: st
   );
 }
 
-function NavLink({ href, title, desc, emoji }: { href: string; title: string; desc: string; emoji: string }) {
+function NavLink({ href, title, desc, icon: Icon }: { href: string; title: string; desc: string; icon: LucideIcon }) {
   return (
     <Link
       href={href}
@@ -104,9 +106,9 @@ function NavLink({ href, title, desc, emoji }: { href: string; title: string; de
     >
       <span
         aria-hidden
-        className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-primary-light text-2xl transition-transform duration-200 group-hover:scale-105"
+        className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-primary-light transition-transform duration-200 group-hover:scale-105"
       >
-        {emoji}
+        <Icon className="h-6 w-6 text-amber-500" />
       </span>
       <div className="min-w-0 flex-1">
         <p className="font-bold text-foreground">{title}</p>

@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LayoutDashboard, Contact, Tags, Settings, KeyRound, Image, QrCode } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 
 interface AdminSidebarProps {
@@ -9,14 +11,14 @@ interface AdminSidebarProps {
   orgName: string;
 }
 
-const NAV_ITEMS = [
-  { href: "", label: "Resumen", emoji: "📊" },
-  { href: "/contactos", label: "Contactos", emoji: "📇" },
-  { href: "/categorias", label: "Categorías", emoji: "🏷️" },
-  { href: "/configuracion", label: "Configuración", emoji: "⚙️" },
-  { href: "/codigo-seguridad", label: "Código", emoji: "🔐" },
-  { href: "/branding", label: "Imagen", emoji: "🖼️" },
-  { href: "/qr", label: "QR vecinos", emoji: "📱" },
+const NAV_ITEMS: { href: string; label: string; icon: LucideIcon }[] = [
+  { href: "", label: "Resumen", icon: LayoutDashboard },
+  { href: "/contactos", label: "Contactos", icon: Contact },
+  { href: "/categorias", label: "Categorías", icon: Tags },
+  { href: "/configuracion", label: "Configuración", icon: Settings },
+  { href: "/codigo-seguridad", label: "Código", icon: KeyRound },
+  { href: "/branding", label: "Imagen", icon: Image },
+  { href: "/qr", label: "QR vecinos", icon: QrCode },
 ];
 
 export function AdminSidebar({ slug, orgName }: AdminSidebarProps) {
@@ -49,9 +51,7 @@ export function AdminSidebar({ slug, orgName }: AdminSidebarProps) {
                   : "text-muted-foreground hover:bg-surface",
               ].join(" ")}
             >
-              <span aria-hidden className="text-base">
-                {item.emoji}
-              </span>
+              <item.icon className="h-4 w-4 text-amber-500" aria-hidden="true" />
               {item.label}
             </Link>
           ))}
@@ -73,9 +73,7 @@ export function AdminSidebar({ slug, orgName }: AdminSidebarProps) {
                 : "text-muted-foreground",
             ].join(" ")}
           >
-            <span aria-hidden className="text-lg">
-              {item.emoji}
-            </span>
+            <item.icon className="h-5 w-5 text-amber-500" aria-hidden="true" />
             {item.label}
           </Link>
         ))}

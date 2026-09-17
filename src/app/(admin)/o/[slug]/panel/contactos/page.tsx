@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { Inbox, Star } from "lucide-react";
 import { deleteContactAction } from "../actions";
 import { PageHeader, EmptyState } from "@/components/admin/PageBits";
 import { getOrgBySlug } from "@/lib/data/orgs";
@@ -35,8 +36,9 @@ export default async function ContactsAdminPage({ params }: { params: Promise<{ 
                 <p className="truncate text-sm text-muted-foreground">
                   {c.phone} · {c.category_label ?? "Sin categoría"}
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  ⭐ {Number(c.avg_rating).toFixed(1)} ({c.rating_count} voto{c.rating_count === 1 ? "" : "s"})
+                <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                  <Star className="h-3.5 w-3.5 text-amber-500" aria-hidden="true" />
+                  {Number(c.avg_rating).toFixed(1)} ({c.rating_count} voto{c.rating_count === 1 ? "" : "s"})
                 </p>
               </div>
               <form
@@ -57,7 +59,7 @@ export default async function ContactsAdminPage({ params }: { params: Promise<{ 
         </div>
       ) : (
         <EmptyState
-          emoji="📭"
+          icon={Inbox}
           title="Aún no hay contactos"
           desc="Los vecinos pueden agregarlos desde el portal escaneando el QR."
         />

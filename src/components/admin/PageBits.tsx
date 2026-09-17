@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { LucideIcon } from "lucide-react";
 
 export function PageHeader({
   title,
@@ -26,12 +27,12 @@ export function PageHeader({
   );
 }
 
-export function EmptyState({ emoji, title, desc }: { emoji: string; title: string; desc: string }) {
+export function EmptyState({ icon: Icon, title, desc }: { icon: LucideIcon; title: string; desc: string }) {
   return (
     <div className="rounded-2xl border-2 border-dashed border-border bg-white p-12 text-center">
-      <p aria-hidden className="mb-3 text-5xl">
-        {emoji}
-      </p>
+      <div aria-hidden className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-light">
+        <Icon className="h-8 w-8 text-amber-500" />
+      </div>
       <h3 className="mb-1 font-bold text-foreground">{title}</h3>
       <p className="text-sm text-muted-foreground">{desc}</p>
     </div>
