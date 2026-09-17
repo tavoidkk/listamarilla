@@ -1,41 +1,52 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
+import { InstallApp } from "@/components/resident/InstallApp";
+import { Logo } from "@/components/brand/Logo";
+import { ShieldCheck } from "lucide-react";
 
 interface DisclaimerProps {
   orgName: string;
+  orgSlug: string;
   onAccept: () => void;
 }
 
-export function Disclaimer({ orgName, onAccept }: DisclaimerProps) {
+export function Disclaimer({ orgName, orgSlug, onAccept }: DisclaimerProps) {
   return (
-    <div className="app-fade flex min-h-screen w-full flex-col items-center justify-center bg-white/80 backdrop-blur-sm px-6 py-12 text-center">
-      <div
-        className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-primary text-primary-foreground shadow-lg animate-[scaleIn_0.4s_ease]"
-        aria-hidden
-      >
-        <svg viewBox="0 0 24 24" fill="none" className="h-10 w-10" stroke="currentColor" strokeWidth="1.8">
-          <path d="M3 7l9-4 9 4M5 9v10a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V9" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M3 7l9 4 9-4" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </div>
-      <h1 className="mb-2 text-3xl font-bold tracking-tight text-foreground">{orgName}</h1>
-      <p className="mb-6 text-sm font-semibold text-primary-dark">Directorio de servicios</p>
-      <div className="mx-auto mb-6 h-1 w-16 rounded-full bg-primary" aria-hidden />
+    <div className="app-fade flex min-h-screen w-full flex-col items-center justify-center bg-gradient-to-b from-amber-100/90 via-amber-50/95 to-white px-4 py-8 text-center sm:px-6">
+      <div className="w-full max-w-[520px] overflow-hidden rounded-[28px] border border-amber-200 bg-white shadow-xl shadow-amber-900/10">
+        <div className="border-b border-amber-200 bg-amber-400 px-6 pb-8 pt-7">
+          <Logo size="md" className="rounded-2xl bg-white px-3 py-2 shadow-sm" />
+          <p className="mt-7 text-xs font-bold uppercase tracking-[0.2em] text-slate-800">
+            Directorio de servicios
+          </p>
+          <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
+            {orgName}
+          </h1>
+          <p className="mt-2 text-sm font-medium text-slate-800">
+            Contactos compartidos por los vecinos de tu edificio
+          </p>
+        </div>
 
-      <div className="mb-8 w-full max-w-[480px] rounded-2xl border-l-4 border-primary bg-surface p-6 text-left">
-        <p className="mb-2 text-base font-bold text-foreground">⚠ Aviso importante</p>
-        <p className="whitespace-pre-line text-sm leading-[1.7] text-muted-foreground">
-          {`Este directorio es mantenido únicamente por residentes del ${orgName}.
+        <div className="px-5 pb-7 pt-6 sm:px-8">
+          <InstallApp orgName={orgName} orgSlug={orgSlug} />
+          <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-left">
+            <p className="mb-2 flex items-center gap-2 text-base font-bold text-slate-900">
+              <ShieldCheck size={19} aria-hidden /> Antes de continuar
+            </p>
+            <p className="text-muted-foreground whitespace-pre-line text-sm leading-[1.7]">
+              {`Este directorio es mantenido únicamente por residentes del ${orgName}.
 El condominio no se hace responsable por la calidad, puntualidad, precios o resultado de los servicios de los contactos aquí listados.
 
 Al continuar, usted acepta que cualquier contratación es de su exclusiva responsabilidad.`}
-        </p>
-      </div>
+            </p>
+          </div>
 
-      <Button variant="primary" size="xl" fullWidth onClick={onAccept} className="max-w-[480px]">
-        Entendido, continuar
-      </Button>
+          <Button variant="primary" size="xl" fullWidth onClick={onAccept}>
+            Entendido, continuar
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

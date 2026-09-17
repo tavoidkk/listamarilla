@@ -1,8 +1,8 @@
 // Paginas Amarillas - Service Worker
-// Cache-first para assets estáticos, network-first para HTML.
+// Solo los recursos compartidos se guardan; cada portal se consulta en línea.
 
-const CACHE_NAME = "pa-cache-v1";
-const PRECACHE_URLS = ["/", "/manifest.webmanifest"];
+const CACHE_NAME = "pa-cache-v2";
+const PRECACHE_URLS = ["/icons/icon.png", "/icons/icon.svg"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -28,19 +28,12 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  // Network-first para HTML
+  // Cada portal y su manifiesto dependen del edificio; nunca reutilizar HTML entre organizaciones.
   if (request.headers.get("accept")?.includes("text/html")) {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)).catch(() => {});
-          return response;
-        })
-        .catch(() => caches.match(request).then((r) => r ?? caches.match("/"))),
-    );
     return;
   }
+
+  if (url.pathname.endsWith(".webmanifest") || url.pathname.startsWith("/o/")) return;
 
   // Cache-first para assets estáticos
   event.respondWith(

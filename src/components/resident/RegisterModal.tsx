@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { toast } from "@/components/ui/Toast";
 import { formatVenezuelanDisplay, countDigits } from "@/lib/phone";
 import { createClient } from "@/lib/supabase/client";
+import { ArrowLeft, Plus } from "lucide-react";
 
 export interface CategoryOption {
   id: string;
@@ -103,7 +104,8 @@ export function RegisterModal({
             total_floors: (data as { total_floors: number }).total_floors,
             apartment_labels: (data as { apartment_labels: string[] }).apartment_labels,
             special_floor_labels:
-              ((data as { special_floor_labels: Record<string, number> }).special_floor_labels ?? {}) ??
+              (data as { special_floor_labels: Record<string, number> }).special_floor_labels ??
+              {} ??
               {},
           });
         }
@@ -210,8 +212,8 @@ export function RegisterModal({
 
   return (
     <Modal open={open} onClose={handleClose} variant="bottom" ariaLabel="Agregar contacto">
-      <h2 className="mb-1 text-center text-2xl font-bold text-foreground">Agregar contacto</h2>
-      <p className="mb-6 text-center text-sm text-muted-foreground">
+      <h2 className="text-foreground mb-1 text-center text-2xl font-bold">Agregar contacto</h2>
+      <p className="text-muted-foreground mb-6 text-center text-sm">
         Comparte un contacto de confianza con tus vecinos
       </p>
 
@@ -257,7 +259,7 @@ export function RegisterModal({
               if (
                 e.key.length === 1 &&
                 !NAME_REGEX.test(e.key) &&
-                !["Backspace",",Delete","Tab","ArrowLeft","ArrowRight"].includes(e.key)
+                !["Backspace", ",Delete", "Tab", "ArrowLeft", "ArrowRight"].includes(e.key)
               ) {
                 e.preventDefault();
               }
@@ -321,10 +323,15 @@ export function RegisterModal({
         <button
           type="button"
           onClick={() => setCategoryMode((m) => (m === "existing" ? "new" : "existing"))}
-          className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-primary-dark underline-offset-4 hover:underline"
+          className="mb-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-amber-400 bg-amber-50 px-4 py-2 text-sm font-bold text-slate-900 transition-colors hover:border-amber-500 hover:bg-amber-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500 disabled:opacity-50"
           disabled={submitting}
         >
-          {categoryMode === "existing" ? "+ Crear nueva categoría" : "← Elegir categoría existente"}
+          {categoryMode === "existing" ? (
+            <Plus size={18} aria-hidden />
+          ) : (
+            <ArrowLeft size={18} aria-hidden />
+          )}
+          {categoryMode === "existing" ? "Crear nueva categoría" : "Elegir categoría existente"}
         </button>
 
         <div className="relative">
@@ -343,7 +350,7 @@ export function RegisterModal({
               if (
                 e.key.length === 1 &&
                 !NAME_REGEX.test(e.key) &&
-                !["Backspace",",Delete","Tab","ArrowLeft","ArrowRight"].includes(e.key)
+                !["Backspace", ",Delete", "Tab", "ArrowLeft", "ArrowRight"].includes(e.key)
               ) {
                 e.preventDefault();
               }

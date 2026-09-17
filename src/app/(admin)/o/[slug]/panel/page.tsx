@@ -45,14 +45,14 @@ export default async function AdminDashboardPage({ params }: { params: Promise<{
             href={`/o/${slug}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-xl border border-amber-400 bg-amber-400 px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition-colors hover:bg-amber-500 hover:shadow-md"
+            className="rounded-xl border border-amber-400 bg-amber-400 px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition-colors hover:bg-amber-500 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500"
           >
             👁 Ver portal vecinos
           </Link>
           <form action={logoutAction.bind(null, slug)}>
             <button
               type="submit"
-              className="rounded-xl border border-border bg-white px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-surface"
+              className="rounded-xl border border-border bg-white px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500"
             >
               Cerrar sesión
             </button>
@@ -86,7 +86,7 @@ export default async function AdminDashboardPage({ params }: { params: Promise<{
 
 function Stat({ label, value, icon: Icon }: { label: string; value: number; icon: LucideIcon }) {
   return (
-    <div className="rounded-2xl border border-border bg-white p-4 transition-colors hover:border-primary">
+    <div className="rounded-2xl border border-border bg-white p-4 shadow-sm">
       <div className="mb-2 flex items-center justify-between">
         <span aria-hidden className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-light">
           <Icon className="h-5 w-5 text-amber-500" />
@@ -102,7 +102,7 @@ function NavLink({ href, title, desc, icon: Icon }: { href: string; title: strin
   return (
     <Link
       href={href}
-      className="group flex items-center gap-3 rounded-2xl border border-border bg-white p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:shadow-md"
+      className="group flex items-center gap-3 rounded-2xl border border-border bg-white p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500"
     >
       <span
         aria-hidden

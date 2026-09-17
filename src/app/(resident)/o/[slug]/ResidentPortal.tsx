@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useOptimistic, startTransition } from "react";
 import { Disclaimer } from "@/components/resident/Disclaimer";
+import { InstallApp } from "@/components/resident/InstallApp";
 import { CategorySelector } from "@/components/resident/CategorySelector";
 import { ContactList, type ContactItem } from "@/components/resident/ContactList";
 import { ContactDetailModal, type ContactDetail } from "@/components/resident/ContactDetailModal";
@@ -49,7 +50,7 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const accepted = sessionStorage.getItem(DISCLAIMER_KEY_PREFIX + orgSlug) === "1";
-    setDisclaimerAccepted(accepted);
+    queueMicrotask(() => setDisclaimerAccepted(accepted));
   }, [orgSlug]);
 
   useEffect(() => {
@@ -79,7 +80,9 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
       const supabase = createClient();
       const { data, error } = await supabase
         .from("contacts")
-        .select("id, name, phone, category_emoji, category_label, avg_rating, rating_count, added_by_name")
+        .select(
+          "id, name, phone, category_emoji, category_label, avg_rating, rating_count, added_by_name",
+        )
         .eq("org_id", orgId)
         .eq("category_id", category.id)
         .order("avg_rating", { ascending: false });
@@ -264,7 +267,7 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
   }
 
   if (disclaimerAccepted !== true) {
-    return <Disclaimer orgName={orgName} onAccept={handleAcceptDisclaimer} />;
+    return <Disclaimer orgName={orgName} orgSlug={orgSlug} onAccept={handleAcceptDisclaimer} />;
   }
 
   if (!selectedCategory) {
@@ -276,6 +279,7 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
           onSelect={setSelectedCategory}
           onAddClick={() => setRegisterOpen(true)}
         />
+        <InstallApp orgName={orgName} orgSlug={orgSlug} floating />
         <RegisterModal
           open={registerOpen}
           orgId={orgId}

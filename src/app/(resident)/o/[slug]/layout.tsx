@@ -2,10 +2,28 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { themeToCssVars } from "@/lib/theme";
 import { ToastContainer } from "@/components/ui/Toast";
+import type { Metadata } from "next";
 
 interface LayoutProps {
   children: React.ReactNode;
   params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: LayoutProps): Promise<Metadata> {
+  const { slug } = await params;
+  const supabase = await createClient();
+  const { data: org } = await supabase
+    .from("organizations")
+    .select("name, subscription_status")
+    .eq("slug", slug)
+    .single();
+  if (!org || !["trial", "active"].includes(org.subscription_status as string)) return {};
+  return {
+    title: `${org.name} — LISTAMARILLA`,
+    applicationName: org.name,
+    manifest: `/o/${encodeURIComponent(slug)}/manifest.webmanifest`,
+    appleWebApp: { capable: true, statusBarStyle: "default", title: org.name },
+  };
 }
 
 export default async function ResidentLayout({ children, params }: LayoutProps) {

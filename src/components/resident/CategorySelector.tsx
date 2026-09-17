@@ -54,7 +54,7 @@ export function CategorySelector({ categories, orgName, onSelect, onAddClick }: 
             LISTAMARILLA
           </p>
           {orgName ? (
-            <p className="mb-3 text-center text-xs font-semibold text-orange-500/100">{orgName}</p>
+            <p className="mb-3 text-center text-sm font-semibold text-slate-800">{orgName}</p>
           ) : null}
           <h1 className="mb-5 text-center text-3xl font-black tracking-tight text-slate-850 md:text-4xl drop-shadow-sm">
             ¿Qué servicio necesitas?
@@ -67,7 +67,7 @@ export function CategorySelector({ categories, orgName, onSelect, onAddClick }: 
               placeholder="Buscar plomería, electricista, pintura..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="h-12 w-full rounded-xl border border-amber-500/30 bg-white/95 backdrop-blur-sm pl-11 pr-10 text-[15px] font-medium text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-amber-500 focus:shadow-md focus:outline-none"
+              className="h-12 w-full rounded-xl border border-amber-500/30 bg-white/95 backdrop-blur-sm pl-11 pr-10 text-[15px] font-medium text-slate-900 shadow-sm placeholder:text-slate-500 focus:border-amber-500 focus:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20"
             />
             {query ? (
               <button

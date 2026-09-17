@@ -6,6 +6,7 @@ import { AnimatedLinesCTA } from "@/components/ui/AnimatedLinesCTA";
 import { MarketingHeader } from "@/components/brand/MarketingHeader";
 import { MarketingFooter } from "@/components/brand/MarketingFooter";
 import { FaqAccordion } from "@/components/ui/FaqAccordion";
+import { HeroPhoneMotion } from "@/components/brand/HeroPhoneMotion";
 
 export default function MarketingHome() {
   return (
@@ -55,7 +56,7 @@ export default function MarketingHome() {
                   />
                   Para juntas de condominio
                 </span>
-                <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-slate-900 md:text-5xl lg:text-6xl">
+                <h1 className="text-4xl font-extrabold leading-[1.18] tracking-tight text-slate-900 md:text-5xl lg:text-6xl">
                   Tu edificio tiene un{" "}
                   <span className="relative inline-block">
                     <span
@@ -68,14 +69,14 @@ export default function MarketingHome() {
                   </span>
                   <br />
                   Tus vecinos{" "}
-                  <span className="bg-gradient-to-r from-amber-500 via-amber-600 to-amber-500 bg-clip-text font-black italic text-transparent">
+                  <span className="inline-block bg-gradient-to-r from-amber-500 via-amber-600 to-amber-500 bg-clip-text pb-2 pr-[0.16em] font-black italic text-transparent [margin-bottom:-0.5rem]">
                     ya lo están usando.
                   </span>
                 </h1>
                 <p className="max-w-xl text-lg leading-relaxed text-slate-600 md:text-xl">
                   Una PWA simple donde tu condominio publica los prestadores de servicios de
-                  confianza. Los vecinos consultan y califican. Sin apps que descargar, sin cuentas
-                  que crear.
+                  confianza. Los vecinos consultan y califican. Pueden agregar el directorio de su
+                  edificio a la pantalla principal, sin crear una cuenta.
                 </p>
                 <div className="flex flex-col gap-4 sm:flex-row">
                   <Link href="/solicitar">
@@ -126,7 +127,7 @@ export default function MarketingHome() {
                 </p>
               </div>
 
-              <div className="relative animate-fade-in-up [animation-delay:200ms]">
+              <HeroPhoneMotion>
                 <div className="relative mx-auto w-full max-w-[300px]">
                   {/* Phone frame más ancho, look iPhone grande */}
                   <div className="relative rounded-[42px] border-[3px] border-slate-800 bg-slate-900 p-[3px] shadow-2xl">
@@ -157,7 +158,7 @@ export default function MarketingHome() {
                         <p className="text-[11px] text-slate-500">Directorio de servicios</p>
                       </div>
                       {/* Grid categorías - 3x2 más alto */}
-                      <div className="grid grid-cols-2 gap-2.5 px-4 pb-8 pt-2">
+                      <div className="hero-phone-content grid grid-cols-2 gap-2.5 px-4 pb-8 pt-2">
                         <div className="flex h-20 flex-col items-center justify-center gap-2 rounded-xl border border-slate-100 bg-slate-50 text-center">
                           <svg
                             className="h-5 w-5 text-amber-600"
@@ -276,7 +277,7 @@ export default function MarketingHome() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </HeroPhoneMotion>
             </div>
           </div>
         </section>
@@ -343,7 +344,7 @@ export default function MarketingHome() {
           />
 
           <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
-            <ScrollReveal direction="up">
+            <ScrollReveal direction="fade" duration={850}>
               <div className="mx-auto mb-16 max-w-3xl text-center">
                 <span className="mb-4 inline-block animate-badge-pulse rounded-full bg-amber-400 px-4 py-1.5 text-sm font-bold text-slate-900">
                   Funciones
@@ -463,7 +464,7 @@ export default function MarketingHome() {
           />
 
           <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
-            <ScrollReveal direction="up">
+            <ScrollReveal direction="right" duration={800}>
               <div className="mx-auto mb-16 max-w-3xl text-center">
                 <span className="mb-4 inline-block animate-badge-pulse rounded-full bg-amber-400 px-4 py-1.5 text-sm font-bold text-slate-900">
                   Cómo funciona
@@ -566,7 +567,7 @@ export default function MarketingHome() {
           />
 
           <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
-            <ScrollReveal direction="up">
+            <ScrollReveal direction="fade" duration={900}>
               <div className="mx-auto mb-12 max-w-3xl text-center">
                 <span className="mb-4 inline-block animate-badge-pulse rounded-full bg-amber-400 px-4 py-1.5 text-sm font-bold text-slate-900">
                   Precio
@@ -612,7 +613,7 @@ export default function MarketingHome() {
                         />
                       </svg>
                       <span className="text-sm text-slate-800">
-                        Portal PWA para vecinos (sin descarga)
+                        Portal para vecinos, instalable en su pantalla principal
                       </span>
                     </li>
                     <li className="flex items-start gap-2">
