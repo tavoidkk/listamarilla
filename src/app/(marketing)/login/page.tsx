@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -89,13 +90,14 @@ export default function MarketingLoginPage() {
 
           {/* Logo / Marca */}
           <div className="text-center space-y-2">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-400 shadow-md">
-              <svg className="h-8 w-8 text-slate-900" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="3" y="3" width="7" height="7" rx="1.5" fill="currentColor" />
-                <rect x="14" y="3" width="7" height="7" rx="1.5" fill="currentColor" />
-                <rect x="3" y="14" width="7" height="7" rx="1.5" fill="currentColor" />
-                <rect x="14" y="14" width="7" height="7" rx="1.5" fill="currentColor" />
-              </svg>
+            <div className="mx-auto flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl shadow-md">
+              <Image
+                src="/icons/icon.png"
+                alt=""
+                width={1000}
+                height={1000}
+                className="h-full w-full object-cover"
+              />
             </div>
             <h1 className="text-3xl font-extrabold text-slate-900">LISTAMARILLA</h1>
             <p className="text-slate-500 text-sm">Inicia sesión en tu cuenta</p>

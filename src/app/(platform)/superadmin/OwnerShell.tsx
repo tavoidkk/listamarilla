@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Building2, Users, ShieldCheck, ArrowLeft } from "lucide-react";
 
@@ -24,14 +25,15 @@ export function OwnerShell({ email, children }: Props) {
           <Link href="/" className="inline-flex items-center gap-2 transition-opacity hover:opacity-80">
             <span
               aria-hidden
-              className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-400 text-slate-900"
+              className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-lg"
             >
-              <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-                <rect x="3" y="3" width="7" height="7" rx="1.5" fill="currentColor" />
-                <rect x="14" y="3" width="7" height="7" rx="1.5" fill="currentColor" />
-                <rect x="3" y="14" width="7" height="7" rx="1.5" fill="currentColor" />
-                <rect x="14" y="14" width="7" height="7" rx="1.5" fill="currentColor" />
-              </svg>
+              <Image
+                src="/icons/icon.png"
+                alt=""
+                width={1000}
+                height={1000}
+                className="h-full w-full object-cover"
+              />
             </span>
             <span className="text-sm font-extrabold text-white">LISTAMARILLA</span>
           </Link>
@@ -82,14 +84,15 @@ export function OwnerShell({ email, children }: Props) {
           <Link href="/" className="inline-flex items-center gap-2">
             <span
               aria-hidden
-              className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-400 text-slate-900"
+              className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg"
             >
-              <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
-                <rect x="3" y="3" width="7" height="7" rx="1.5" fill="currentColor" />
-                <rect x="14" y="3" width="7" height="7" rx="1.5" fill="currentColor" />
-                <rect x="3" y="14" width="7" height="7" rx="1.5" fill="currentColor" />
-                <rect x="14" y="14" width="7" height="7" rx="1.5" fill="currentColor" />
-              </svg>
+              <Image
+                src="/icons/icon.png"
+                alt=""
+                width={1000}
+                height={1000}
+                className="h-full w-full object-cover"
+              />
             </span>
             <span className="text-sm font-extrabold text-slate-900">LISTAMARILLA</span>
           </Link>

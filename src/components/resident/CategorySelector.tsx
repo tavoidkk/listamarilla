@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import { Search, X } from "lucide-react";
 
 interface Category {
@@ -42,6 +43,13 @@ export function CategorySelector({ categories, orgName, onSelect, onAddClick }: 
           className="absolute inset-0 opacity-[0.12] bg-[radial-gradient(ellipse_at_top_right,_#fff_0%,_transparent_55%)]"
         />
         <div className="relative">
+          <Image
+            src="/icons/icon.png"
+            alt=""
+            width={1000}
+            height={1000}
+            className="mx-auto mb-1 block h-10 w-10 rounded-xl object-cover shadow-sm"
+          />
           <p className="mb-1 text-center text-xs font-extrabold uppercase tracking-[0.35em] text-black">
             LISTAMARILLA
           </p>
