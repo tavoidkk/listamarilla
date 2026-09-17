@@ -11,8 +11,8 @@ const PRODUCT = [
 const COMPANY = [
   { label: "Acerca de", href: "#" },
   { label: "Contacto", href: "#" },
-  { label: "Términos", href: "#" },
-  { label: "Privacidad", href: "#" },
+  { label: "Términos", href: "/terminos" },
+  { label: "Privacidad", href: "/privacidad" },
 ];
 
 export function MarketingFooter() {
