@@ -104,9 +104,8 @@ export function RegisterModal({
             total_floors: (data as { total_floors: number }).total_floors,
             apartment_labels: (data as { apartment_labels: string[] }).apartment_labels,
             special_floor_labels:
-              (data as { special_floor_labels: Record<string, number> }).special_floor_labels ??
-              {} ??
-              {},
+              (data as { special_floor_labels: Record<string, number> | null })
+                .special_floor_labels ?? {},
           });
         }
       });
