@@ -7,8 +7,8 @@ export default async function QRPage({ params }: { params: Promise<{ slug: strin
   const org = await getOrgBySlug(slug);
   if (!org) return null;
 
-  const base = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const url = `${base}/o/${slug}`;
+  const base = process.env.NEXT_PUBLIC_APP_URL ?? "https://listamarilla.vercel.app";
+  const url = new URL(`/o/${encodeURIComponent(slug)}`, base).toString();
 
   return (
     <div>
