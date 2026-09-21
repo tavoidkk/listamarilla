@@ -13,6 +13,7 @@ import {
 } from "@/components/resident/RegisterModal";
 import { createClient } from "@/lib/supabase/client";
 import { getSessionId } from "@/lib/session";
+import { ArrowLeft, Plus } from "lucide-react";
 
 const DISCLAIMER_KEY_PREFIX = "pa:disclaimer-accepted:";
 
@@ -287,6 +288,7 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
           onClose={() => setRegisterOpen(false)}
           onSubmit={handleSubmitContact}
           requireSecurityCode
+          initialCategoryKey=""
         />
       </>
     );
@@ -299,10 +301,11 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
         <button
           type="button"
           onClick={() => setSelectedCategory(null)}
-          aria-label="Volver"
-          className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-amber-600/20 bg-white text-xl text-slate-900 shadow-sm transition-all duration-200 hover:bg-amber-50 active:scale-95"
+          aria-label="Volver a categorías"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-amber-600/20 bg-white px-3 text-sm font-bold text-slate-900 shadow-sm transition-all duration-200 hover:-translate-x-0.5 hover:bg-amber-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 active:scale-95"
         >
-          ←
+          <ArrowLeft className="h-4 w-4" aria-hidden />
+          <span className="hidden sm:inline">Categorías</span>
         </button>
         <div className="flex flex-1 flex-col items-center gap-0.5 text-center">
           <p className="text-xs font-bold uppercase tracking-wider text-black">{orgName}</p>
@@ -311,7 +314,7 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
             {selectedCategory.label}
           </p>
         </div>
-        <span className="h-11 w-11" aria-hidden />
+        <span className="h-11 w-[76px]" aria-hidden />
       </header>
 
       <ContactList
@@ -328,7 +331,7 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
         aria-label="Agregar contacto"
         className="fixed bottom-6 right-6 z-50 flex h-[60px] w-[60px] items-center justify-center rounded-full bg-amber-400 text-3xl font-light text-slate-900 shadow-xl ring-4 ring-amber-400/20 transition-all duration-200 hover:scale-105 hover:bg-amber-500 hover:shadow-2xl active:scale-[0.93]"
       >
-        +
+        <Plus className="h-7 w-7" aria-hidden />
       </button>
 
       <RegisterModal
@@ -338,6 +341,7 @@ export function ResidentPortal({ orgId, orgSlug, orgName }: Props) {
         onClose={() => setRegisterOpen(false)}
         onSubmit={handleSubmitContact}
         requireSecurityCode
+        initialCategoryKey={selectedCategory.key}
       />
 
       <ContactDetailModal

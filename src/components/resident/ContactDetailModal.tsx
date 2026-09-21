@@ -6,6 +6,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { StarRating, InteractiveStarRating } from "@/components/ui/StarRating";
 import { toast } from "@/components/ui/Toast";
+import { normalizeVenezuelanPhone, toVenezuelanE164 } from "@/lib/phone";
 
 export interface VoteReview {
   id: string;
@@ -65,7 +66,9 @@ export function ContactDetailModal({
   if (!contact) return null;
 
   const currentContact = contact;
-  const wa = `https://wa.me/${contact.phone.replace(/\D/g, "")}`;
+  const normalizedPhone = normalizeVenezuelanPhone(contact.phone);
+  const displayPhone = toVenezuelanE164(contact.phone);
+  const wa = `https://wa.me/${normalizedPhone}`;
 
   async function handleVote(value: number, text?: string) {
     if (submitting || value === 0) return;
@@ -87,7 +90,7 @@ export function ContactDetailModal({
   }
 
   async function handleCopy() {
-    const number = currentContact.phone;
+    const number = toVenezuelanE164(currentContact.phone);
     try {
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(number);
@@ -111,21 +114,18 @@ export function ContactDetailModal({
       <div className="mb-5 text-center">
         <div
           aria-hidden
-          className="mx-auto mb-4 flex h-[80px] w-[80px] items-center justify-center rounded-2xl bg-primary-light text-5xl"
+          className="bg-primary-light mx-auto mb-4 flex h-[80px] w-[80px] items-center justify-center rounded-2xl text-5xl"
         >
           {contact.category_emoji ?? "🔧"}
         </div>
         <h2 className="mb-2 break-words text-2xl font-bold text-black">{contact.name}</h2>
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-light px-4 py-1.5 text-sm font-semibold text-primary-dark">
+        <span className="bg-primary-light text-primary-dark inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold">
           {contact.category_emoji ?? "🛠️"} {contact.category_label ?? "Servicio"}
         </span>
         <p className="mt-3 flex items-center justify-center gap-2 text-sm font-semibold text-black">
           <Phone className="h-4 w-4 text-[#25D366]" aria-hidden />
-          <a
-            href={`tel:${contact.phone.replace(/\D/g, "")}`}
-            className="underline-offset-4 hover:underline"
-          >
-            {contact.phone}
+          <a href={`tel:${displayPhone}`} className="underline-offset-4 hover:underline">
+            {displayPhone}
           </a>
           <button
             type="button"
@@ -142,9 +142,9 @@ export function ContactDetailModal({
         </p>
       </div>
 
-      <div className="space-y-3 border-y border-border py-4">
+      <div className="border-border space-y-3 border-y py-4">
         <div className="flex items-center justify-between gap-4">
-          <span className="text-sm font-medium text-muted-foreground">Calificación</span>
+          <span className="text-muted-foreground text-sm font-medium">Calificación</span>
           {contact.rating_count > 0 ? (
             <StarRating
               value={Number(contact.avg_rating)}
@@ -153,7 +153,7 @@ export function ContactDetailModal({
               showValue
             />
           ) : (
-            <span className="text-sm italic text-muted-foreground">Sin votos</span>
+            <span className="text-muted-foreground text-sm italic">Sin votos</span>
           )}
         </div>
         {contact.added_by_name ? (
@@ -162,7 +162,7 @@ export function ContactDetailModal({
             <span className="text-right font-medium text-black">
               {contact.added_by_name}
               {contact.floor || contact.apartment ? (
-                <span className="block text-xs text-muted-foreground">
+                <span className="text-muted-foreground block text-xs">
                   {contact.floor ? `Piso ${contact.floor}` : ""}
                   {contact.floor && contact.apartment ? " · " : ""}
                   {contact.apartment ? `Apt ${contact.apartment}` : ""}
@@ -175,36 +175,36 @@ export function ContactDetailModal({
 
       {contact.reviews.length > 0 ? (
         <div className="mt-4 space-y-2">
-          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+          <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">
             Comentarios de vecinos
           </p>
           {contact.reviews.map((r) => (
-            <div key={r.id} className="rounded-xl bg-surface p-3">
+            <div key={r.id} className="bg-surface rounded-xl p-3">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-sm font-semibold text-black">
                   {r.voter_name ?? "Vecino anónimo"}
                 </span>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-muted-foreground text-xs">
                   {r.floor != null ? `Piso ${r.floor} · Apt ${r.apartment ?? "—"}` : ""}
                 </span>
               </div>
               <div className="mt-1 flex items-center gap-2">
                 <StarRating value={r.rating} size="sm" />
-                {r.comment ? <span className="text-xs text-muted-foreground">·</span> : null}
+                {r.comment ? <span className="text-muted-foreground text-xs">·</span> : null}
               </div>
-              {r.comment ? <p className="mt-1 text-sm text-muted-foreground">{r.comment}</p> : null}
+              {r.comment ? <p className="text-muted-foreground mt-1 text-sm">{r.comment}</p> : null}
             </div>
           ))}
         </div>
       ) : null}
 
       {voted ? (
-        <div className="mt-5 rounded-xl bg-success-bg p-3 text-center text-sm font-semibold text-success">
+        <div className="bg-success-bg text-success mt-5 rounded-xl p-3 text-center text-sm font-semibold">
           ✓ Ya calificaste este contacto
         </div>
       ) : (
         <div className="mt-5 text-center">
-          <p className="mb-3 text-sm font-semibold text-muted-foreground">¿Cómo te fue?</p>
+          <p className="text-muted-foreground mb-3 text-sm font-semibold">¿Cómo te fue?</p>
           <InteractiveStarRating
             value={rating}
             onChange={(n) => {
@@ -235,7 +235,7 @@ export function ContactDetailModal({
               >
                 Enviar calificación
               </Button>
-              <p className="text-center text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-center text-xs">
                 Voto anónimo · un voto por navegador
               </p>
             </div>
