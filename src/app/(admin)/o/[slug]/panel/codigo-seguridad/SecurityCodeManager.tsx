@@ -20,8 +20,8 @@ export function SecurityCodeManager({ slug, currentCode }: Props) {
 
   async function handleUpdate(e: React.FormEvent) {
     e.preventDefault();
-    if (newCode.length < 4) {
-      toast({ kind: "error", message: "Mínimo 4 caracteres" });
+    if (!/^\d{4,}$/.test(newCode)) {
+      toast({ kind: "error", message: "Ingresa al menos 4 números" });
       return;
     }
     startTransition(async () => {
@@ -37,8 +37,7 @@ export function SecurityCodeManager({ slug, currentCode }: Props) {
   }
 
   function generateRandom() {
-    const part = () => Math.random().toString(36).slice(2, 6).toUpperCase();
-    setNewCode(`${part()}-${part()}`);
+    setNewCode(String(crypto.getRandomValues(new Uint32Array(1))[0] % 1000000).padStart(6, "0"));
   }
 
   async function copyCode() {
@@ -71,7 +70,11 @@ export function SecurityCodeManager({ slug, currentCode }: Props) {
                 aria-label="Copiar código"
                 className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-amber-300 bg-white text-amber-600 shadow-sm transition-colors hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-400"
               >
-                {copied ? <Check className="h-5 w-5" aria-hidden="true" /> : <Copy className="h-5 w-5" aria-hidden="true" />}
+                {copied ? (
+                  <Check className="h-5 w-5" aria-hidden="true" />
+                ) : (
+                  <Copy className="h-5 w-5" aria-hidden="true" />
+                )}
               </button>
             </>
           ) : (
@@ -83,28 +86,44 @@ export function SecurityCodeManager({ slug, currentCode }: Props) {
         </p>
       </div>
 
-      <form onSubmit={handleUpdate} className="rounded-2xl border border-border bg-surface p-5">
-        <h3 className="mb-4 font-bold text-foreground">Cambiar código</h3>
+      <form onSubmit={handleUpdate} className="border-border bg-surface rounded-2xl border p-5">
+        <h3 className="text-foreground mb-4 font-bold">Cambiar código</h3>
         <Field
           id="newCode"
           label="Nuevo código"
-          placeholder="Ej: COLINA-2026"
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          placeholder="Ej: 482615"
           value={newCode}
-          onChange={(e) => setNewCode(e.target.value)}
+          onChange={(e) => setNewCode(e.target.value.replace(/\D/g, ""))}
           disabled={isPending}
-          hint="Mínimo 4 caracteres. Puedes generarlo automáticamente."
+          hint="Usa al menos 4 números. También puedes generar uno seguro."
         />
-        <Button type="button" variant="ghost" size="sm" onClick={generateRandom} disabled={isPending} className="mb-3">
+        <Button
+          type="button"
+          variant="outline"
+          size="md"
+          onClick={generateRandom}
+          disabled={isPending}
+          className="mb-4 w-full border-amber-300 bg-white text-slate-900 shadow-sm hover:bg-amber-50"
+        >
           <RefreshCw className="h-4 w-4" aria-hidden="true" />
-          Generar aleatorio
+          Generar código de 6 números
         </Button>
-        <Button type="submit" variant="primary" loading={isPending} disabled={newCode.length < 4} fullWidth>
+        <Button
+          type="submit"
+          variant="primary"
+          loading={isPending}
+          disabled={newCode.length < 4}
+          fullWidth
+        >
           Actualizar código
         </Button>
       </form>
 
-      <p className="flex items-start gap-2 rounded-xl bg-warning-bg px-4 py-3 text-xs text-warning">
-        <TriangleAlert className="h-4 w-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
+      <p className="bg-warning-bg text-warning flex items-start gap-2 rounded-xl px-4 py-3 text-xs">
+        <TriangleAlert className="mt-0.5 h-4 w-4 flex-shrink-0" aria-hidden="true" />
         Cambiar el código invalida el anterior. Notifica a los vecinos del nuevo.
       </p>
     </div>

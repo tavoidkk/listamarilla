@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getOrgBySlug } from "@/lib/data/orgs";
 import { getCurrentUser, getMembershipForOrg } from "@/lib/data/session";
+import { normalizeVenezuelanPhone } from "@/lib/phone";
 
 export async function logoutAction(slug: string) {
   const supabase = await createClient();
@@ -33,7 +34,11 @@ async function requireOrg(slug: string) {
 export async function deleteContactAction(slug: string, contactId: string) {
   const { orgId } = await requireOrg(slug);
   const supabase = await createClient();
-  const { error } = await supabase.from("contacts").delete().eq("id", contactId).eq("org_id", orgId);
+  const { error } = await supabase
+    .from("contacts")
+    .delete()
+    .eq("id", contactId)
+    .eq("org_id", orgId);
   if (error) throw error;
   revalidatePath(`/o/${slug}/panel/contactos`);
   revalidatePath(`/o/${slug}`);
@@ -46,11 +51,18 @@ export async function updateContactAction(
 ) {
   const { orgId } = await requireOrg(slug);
   const supabase = await createClient();
-  const updates: { name?: string; phone?: string; phone_normalized?: string; category_id?: string; category_label?: string; category_emoji?: string } = {};
+  const updates: {
+    name?: string;
+    phone?: string;
+    phone_normalized?: string;
+    category_id?: string;
+    category_label?: string;
+    category_emoji?: string;
+  } = {};
   if (data.name) updates.name = data.name;
   if (data.phone) {
     updates.phone = data.phone;
-    updates.phone_normalized = data.phone.replace(/\D/g, "");
+    updates.phone_normalized = normalizeVenezuelanPhone(data.phone);
   }
   if (data.category_id) {
     const { data: cat } = await supabase
@@ -65,7 +77,11 @@ export async function updateContactAction(
       updates.category_emoji = cat.emoji;
     }
   }
-  const { error } = await supabase.from("contacts").update(updates).eq("id", contactId).eq("org_id", orgId);
+  const { error } = await supabase
+    .from("contacts")
+    .update(updates)
+    .eq("id", contactId)
+    .eq("org_id", orgId);
   if (error) throw error;
   revalidatePath(`/o/${slug}/panel/contactos`);
   revalidatePath(`/o/${slug}`);
@@ -92,7 +108,11 @@ export async function createCategoryAction(
 export async function deleteCategoryAction(slug: string, categoryId: string) {
   const { orgId } = await requireOrg(slug);
   const supabase = await createClient();
-  const { error } = await supabase.from("categories").delete().eq("id", categoryId).eq("org_id", orgId);
+  const { error } = await supabase
+    .from("categories")
+    .delete()
+    .eq("id", categoryId)
+    .eq("org_id", orgId);
   if (error) throw error;
   revalidatePath(`/o/${slug}/panel/categorias`);
   revalidatePath(`/o/${slug}`);
@@ -101,6 +121,7 @@ export async function deleteCategoryAction(slug: string, categoryId: string) {
 // ============== CÓDIGO DE SEGURIDAD ==============
 
 export async function updateSecurityCodeAction(slug: string, newCode: string) {
+  if (!/^\d{4,}$/.test(newCode)) throw new Error("El código debe tener al menos 4 números");
   const { orgId } = await requireOrg(slug);
   const supabase = await createClient();
   // Actualizar hash con crypt de Postgres. update_org_security_code es
@@ -110,10 +131,7 @@ export async function updateSecurityCodeAction(slug: string, newCode: string) {
     p_code: newCode,
   });
   if (error) {
-    console.warn(
-      "[updateSecurityCodeAction] fallo al guardar código de seguridad:",
-      error.message,
-    );
+    console.warn("[updateSecurityCodeAction] fallo al guardar código de seguridad:", error.message);
     throw error;
   }
   revalidatePath(`/o/${slug}/panel/codigo-seguridad`);
