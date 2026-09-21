@@ -30,7 +30,13 @@ export function CreateOrgModal({
   }
 
   return (
-    <Modal open={open} onClose={onClose} variant="center" hideCloseButton ariaLabel="Nueva organización">
+    <Modal
+      open={open}
+      onClose={onClose}
+      variant="center"
+      hideCloseButton
+      ariaLabel="Nueva organización"
+    >
       <header className="mb-4 flex items-start justify-between gap-3">
         <div>
           <p className="text-xs font-bold uppercase tracking-wider text-amber-600">Owner Console</p>
@@ -39,7 +45,8 @@ export function CreateOrgModal({
             Nueva organización
           </h2>
           <p className="mt-1 text-xs text-slate-500">
-            Al crearla se generará un administrador de condominio con acceso exclusivo a esta organización.
+            Al crearla se generará un administrador de condominio con acceso exclusivo a esta
+            organización.
           </p>
         </div>
         <button
@@ -53,7 +60,10 @@ export function CreateOrgModal({
 
       <form action={handleSubmit} className="space-y-3">
         {error ? (
-          <div role="alert" className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">
+          <div
+            role="alert"
+            className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700"
+          >
             {error}
           </div>
         ) : null}
@@ -68,7 +78,7 @@ export function CreateOrgModal({
             required
             disabled={pending}
             placeholder="Ej: Edificio Colina Del Este"
-            className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+            className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-amber-400"
           />
         </div>
 
@@ -83,9 +93,11 @@ export function CreateOrgModal({
             disabled={pending}
             placeholder="colina-del-este"
             pattern="[a-z0-9-]+"
-            className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+            className="w-full rounded-xl border border-slate-300 px-3 py-2.5 font-mono text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-amber-400"
           />
-          <p className="text-xs text-slate-500">URL: /o/<strong>colina-del-este</strong>/panel</p>
+          <p className="text-xs text-slate-500">
+            URL: /o/<strong>colina-del-este</strong>/panel
+          </p>
         </div>
 
         <div className="space-y-1">
@@ -98,10 +110,17 @@ export function CreateOrgModal({
             required
             disabled={pending}
             minLength={4}
-            placeholder="COLINA-2026"
-            className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+            inputMode="numeric"
+            pattern="[0-9]{4,}"
+            placeholder="Ej: 482615"
+            onInput={(event) => {
+              event.currentTarget.value = event.currentTarget.value.replace(/\D/g, "");
+            }}
+            className="w-full rounded-xl border border-slate-300 px-3 py-2.5 font-mono text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-amber-400"
           />
-          <p className="text-xs text-slate-500">Lo compartirás con los vecinos para que puedan registrarse</p>
+          <p className="text-xs text-slate-500">
+            Mínimo 4 números. Lo compartirás con los vecinos.
+          </p>
         </div>
 
         <div className="rounded-xl border border-blue-200 bg-blue-50/60 p-3">
@@ -117,7 +136,7 @@ export function CreateOrgModal({
               required
               disabled={pending}
               placeholder="Nombre completo del administrador"
-              className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+              className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-amber-400"
             />
             <input
               name="admin_email"
@@ -125,7 +144,7 @@ export function CreateOrgModal({
               required
               disabled={pending}
               placeholder="admin@condominio.com"
-              className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+              className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-amber-400"
             />
             <input
               name="admin_password"
@@ -134,7 +153,7 @@ export function CreateOrgModal({
               disabled={pending}
               minLength={8}
               placeholder="Contraseña (mín. 8 caracteres)"
-              className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+              className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-amber-400"
             />
           </div>
         </div>

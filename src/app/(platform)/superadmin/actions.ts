@@ -58,7 +58,10 @@ export async function toggleSubscriptionAction(orgId: string, currentStatus: str
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await svc.from("organizations").update(update as any).eq("id", orgId);
+  const { error } = await svc
+    .from("organizations")
+    .update(update as any)
+    .eq("id", orgId);
   if (error) throw error;
   revalidatePath("/superadmin");
 }
@@ -121,20 +124,31 @@ export async function createOrgAction(formData: FormData) {
 
   // Datos del administrador de condominio (obligatorio)
   const adminName = String(formData.get("admin_name") ?? "").trim();
-  const adminEmail = String(formData.get("admin_email") ?? "").trim().toLowerCase();
+  const adminEmail = String(formData.get("admin_email") ?? "")
+    .trim()
+    .toLowerCase();
   const adminPassword = String(formData.get("admin_password") ?? "").trim();
 
   if (!name || !slug || !securityCode) {
     return { ok: false as const, error: "Nombre, slug y código de seguridad son obligatorios" };
   }
+  if (!/^\d{4,}$/.test(securityCode)) {
+    return { ok: false as const, error: "El código de seguridad debe tener al menos 4 números" };
+  }
   if (slug.length < 3) {
     return { ok: false as const, error: "El slug debe tener al menos 3 caracteres" };
   }
   if (!adminName || !adminEmail || !adminPassword) {
-    return { ok: false as const, error: "Debes crear el administrador de condominio (nombre, email y contraseña)" };
+    return {
+      ok: false as const,
+      error: "Debes crear el administrador de condominio (nombre, email y contraseña)",
+    };
   }
   if (adminPassword.length < 8) {
-    return { ok: false as const, error: "La contraseña del administrador debe tener al menos 8 caracteres" };
+    return {
+      ok: false as const,
+      error: "La contraseña del administrador debe tener al menos 8 caracteres",
+    };
   }
 
   // Verificar que el slug no exista (case-insensitive)
@@ -164,7 +178,7 @@ export async function createOrgAction(formData: FormData) {
     return {
       ok: false as const,
       error:
-        'No se pudo hashear el código de seguridad. Necesitas crear esta RPC en Supabase: SQL Editor → "create or replace function public.crypt_org_code(code text) returns text language sql stable as $$ select crypt(code, gen_salt(\'bf\', 10)); $$;".',
+        "No se pudo hashear el código de seguridad. Necesitas crear esta RPC en Supabase: SQL Editor → \"create or replace function public.crypt_org_code(code text) returns text language sql stable as $$ select crypt(code, gen_salt('bf', 10)); $$;\".",
     };
   }
 
@@ -222,7 +236,8 @@ async function createAdministratorForOrg(
   {
     const { data: list } = await svc.auth.admin.listUsers({ page: 1, perPage: 1000 });
     existingUserId =
-      list?.users.find((u: { email?: string }) => u.email?.toLowerCase() === normalizedEmail)?.id ?? null;
+      list?.users.find((u: { email?: string }) => u.email?.toLowerCase() === normalizedEmail)?.id ??
+      null;
   }
 
   // 2) Si no existe, intentar crearlo. Si al crearlo falla por duplicado, reutilizarlo.
@@ -244,7 +259,8 @@ async function createAdministratorForOrg(
         // Reintentar buscar el id tras el error de duplicado
         const { data: list2 } = await svc.auth.admin.listUsers({ page: 1, perPage: 1000 });
         existingUserId =
-          list2?.users.find((u: { email?: string }) => u.email?.toLowerCase() === normalizedEmail)?.id ?? null;
+          list2?.users.find((u: { email?: string }) => u.email?.toLowerCase() === normalizedEmail)
+            ?.id ?? null;
       } else {
         return { ok: false as const, error: createErr?.message ?? "No se pudo crear el usuario" };
       }
@@ -318,10 +334,18 @@ export async function updateOrgAction(orgId: string, formData: FormData) {
   }
 
   // Verificar unicidad del slug si cambió
-  const { data: current } = await svc.from("organizations").select("slug").eq("id", orgId).maybeSingle();
+  const { data: current } = await svc
+    .from("organizations")
+    .select("slug")
+    .eq("id", orgId)
+    .maybeSingle();
   if (!current) return { ok: false as const, error: "Organización no encontrada" };
   if (current.slug !== slug) {
-    const { data: dup } = await svc.from("organizations").select("id").eq("slug", slug).maybeSingle();
+    const { data: dup } = await svc
+      .from("organizations")
+      .select("id")
+      .eq("slug", slug)
+      .maybeSingle();
     if (dup && dup.id !== orgId) {
       return { ok: false as const, error: `Ya existe otra organización con el slug "${slug}"` };
     }
@@ -332,7 +356,10 @@ export async function updateOrgAction(orgId: string, formData: FormData) {
   if (backgroundUrl !== null) update.background_url = String(backgroundUrl).trim() || null;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await svc.from("organizations").update(update as any).eq("id", orgId);
+  const { error } = await svc
+    .from("organizations")
+    .update(update as any)
+    .eq("id", orgId);
   if (error) {
     return { ok: false as const, error: error.message };
   }
@@ -369,7 +396,9 @@ export async function deleteOrgAction(orgId: string) {
 export async function createCondoAdminAction(orgId: string, formData: FormData) {
   const svc = createServiceClient();
   const name = String(formData.get("name") ?? "").trim();
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const email = String(formData.get("email") ?? "")
+    .trim()
+    .toLowerCase();
   const password = String(formData.get("password") ?? "").trim();
 
   if (!name || !email || !password) {
@@ -379,7 +408,11 @@ export async function createCondoAdminAction(orgId: string, formData: FormData) 
     return { ok: false as const, error: "La contraseña debe tener al menos 8 caracteres" };
   }
 
-  const { ok, error, userId } = await createAdministratorForOrg(svc, orgId, { name, email, password });
+  const { ok, error, userId } = await createAdministratorForOrg(svc, orgId, {
+    name,
+    email,
+    password,
+  });
   if (!ok) return { ok: false as const, error };
 
   revalidatePath("/superadmin");
@@ -409,14 +442,20 @@ export async function updateMemberAction(formData: FormData) {
 
 export async function suspendMemberAction(membershipId: string) {
   const svc = createServiceClient();
-  const { error } = await svc.from("memberships").update({ status: "suspended" }).eq("id", membershipId);
+  const { error } = await svc
+    .from("memberships")
+    .update({ status: "suspended" })
+    .eq("id", membershipId);
   if (error) throw error;
   revalidatePath("/superadmin");
 }
 
 export async function reactivateMemberAction(membershipId: string) {
   const svc = createServiceClient();
-  const { error } = await svc.from("memberships").update({ status: "active" }).eq("id", membershipId);
+  const { error } = await svc
+    .from("memberships")
+    .update({ status: "active" })
+    .eq("id", membershipId);
   if (error) throw error;
   revalidatePath("/superadmin");
 }
@@ -448,7 +487,9 @@ export async function updateProfileAction(formData: FormData) {
 export async function updateUserEmailAction(formData: FormData) {
   const svc = createServiceClient();
   const userId = String(formData.get("user_id") ?? "");
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const email = String(formData.get("email") ?? "")
+    .trim()
+    .toLowerCase();
 
   if (!userId || !email) return { ok: false as const, error: "Datos incompletos" };
 
@@ -482,7 +523,9 @@ function generatePassword(): string {
  */
 export async function createOwnerAction(formData: FormData) {
   const svc = createServiceClient();
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const email = String(formData.get("email") ?? "")
+    .trim()
+    .toLowerCase();
   const full_name = String(formData.get("full_name") ?? "").trim();
   const password = String(formData.get("password") ?? "").trim() || generatePassword();
 
@@ -527,7 +570,9 @@ export async function createOwnerAction(formData: FormData) {
 export async function updateOwnerAction(formData: FormData) {
   const svc = createServiceClient();
   const userId = String(formData.get("user_id") ?? "");
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const email = String(formData.get("email") ?? "")
+    .trim()
+    .toLowerCase();
   const full_name = String(formData.get("full_name") ?? "").trim();
 
   if (!userId) return { ok: false as const, error: "ID de owner requerido" };
@@ -572,7 +617,9 @@ export async function updateOwnerMetaAction(userId: string, isPlatformOwner: boo
   revalidatePath("/superadmin/owners");
 }
 
-export async function deleteOwnerAction(userId: string): Promise<{ ok: true } | { ok: false; error: string }> {
+export async function deleteOwnerAction(
+  userId: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
   const svc = createServiceClient();
   await svc.from("memberships").delete().eq("user_id", userId);
   await svc.from("profiles").delete().eq("id", userId);
