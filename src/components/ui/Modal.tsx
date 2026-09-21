@@ -1,6 +1,7 @@
 "use client";
 
 import { type ReactNode, useEffect } from "react";
+import { X } from "lucide-react";
 
 interface ModalProps {
   open: boolean;
@@ -59,19 +60,17 @@ export function Modal({
       <div className={containerClass}>
         <div className={panelClass}>
           {variant === "bottom" ? (
-            <div
-              className="mx-auto mb-5 h-1 w-10 rounded-full bg-border"
-              aria-hidden
-            />
+            <div className="bg-border mx-auto mb-5 h-1 w-10 rounded-full" aria-hidden />
           ) : null}
           {onClose && !hideCloseButton ? (
             <button
               type="button"
               onClick={onClose}
               aria-label="Cerrar"
-              className="absolute right-4 top-4 z-[2] inline-flex h-10 w-10 items-center justify-center rounded-full bg-surface-2 text-lg text-foreground transition-colors hover:bg-primary-light"
+              className="absolute right-4 top-4 z-[2] inline-flex h-11 items-center gap-2 rounded-full border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 shadow-md transition-all hover:border-amber-300 hover:bg-amber-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500"
             >
-              ✕
+              <X className="h-4 w-4" aria-hidden />
+              <span className="hidden sm:inline">Cerrar</span>
             </button>
           ) : null}
           {children}
