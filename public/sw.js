@@ -1,8 +1,8 @@
 // Paginas Amarillas - Service Worker
 // Solo los recursos compartidos se guardan; cada portal se consulta en línea.
 
-const CACHE_NAME = "pa-cache-v2";
-const PRECACHE_URLS = ["/icons/icon.png", "/icons/icon.svg"];
+const CACHE_NAME = "pa-cache-v3";
+const PRECACHE_URLS = ["/icons/pwa-192.png", "/icons/pwa-512.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

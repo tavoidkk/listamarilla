@@ -9,6 +9,12 @@ interface InstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+declare global {
+  interface Window {
+    __listamarillaInstallPrompt?: InstallPromptEvent;
+  }
+}
+
 const keyFor = (slug: string) => `pa:install-offered:${slug}`;
 let pendingInstallPrompt: InstallPromptEvent | null = null;
 
@@ -28,6 +34,7 @@ export function InstallApp({
   const [showOffer, setShowOffer] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [isIos, setIsIos] = useState(false);
+  const [isAndroid, setIsAndroid] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -39,12 +46,19 @@ export function InstallApp({
       if (!active) return;
       setInstalled(standalone);
       setIsIos(/iPad|iPhone|iPod/.test(navigator.userAgent));
+      setIsAndroid(/Android/i.test(navigator.userAgent));
+      const capturedPrompt = window.__listamarillaInstallPrompt ?? pendingInstallPrompt;
+      if (capturedPrompt) {
+        pendingInstallPrompt = capturedPrompt;
+        setPromptEvent(capturedPrompt);
+      }
       setShowOffer(!floating && !standalone && localStorage.getItem(keyFor(orgSlug)) !== "1");
     });
 
     const onPrompt = (event: Event) => {
       event.preventDefault();
       pendingInstallPrompt = event as InstallPromptEvent;
+      window.__listamarillaInstallPrompt = pendingInstallPrompt;
       setPromptEvent(pendingInstallPrompt);
     };
     const onInstalled = () => {
@@ -77,6 +91,7 @@ export function InstallApp({
     await promptEvent.prompt();
     const choice = await promptEvent.userChoice;
     pendingInstallPrompt = null;
+    window.__listamarillaInstallPrompt = undefined;
     setPromptEvent(null);
     if (choice.outcome === "dismissed") setShowHelp(true);
   }
@@ -102,7 +117,9 @@ export function InstallApp({
             <p className="mb-1 font-bold text-slate-900">Agrega {orgName} a tu inicio</p>
             {isIos
               ? "En Safari, toca Compartir y luego ‘Agregar a pantalla de inicio’."
-              : "Abre el menú de tu navegador y elige ‘Instalar aplicación’ o ‘Agregar a pantalla de inicio’."}
+              : isAndroid
+                ? "En Chrome, abre el menú ⋮ y toca ‘Instalar aplicación’."
+                : "Abre el menú de tu navegador y elige ‘Instalar aplicación’ o ‘Agregar a pantalla de inicio’."}
           </div>
         ) : null}
         <button
@@ -160,7 +177,9 @@ export function InstallApp({
         >
           {isIos
             ? "En Safari, toca Compartir y luego ‘Agregar a pantalla de inicio’."
-            : "Abre el menú de tu navegador y elige ‘Instalar aplicación’ o ‘Agregar a pantalla de inicio’."}
+            : isAndroid
+              ? "En Chrome, abre el menú ⋮ y toca ‘Instalar aplicación’."
+              : "Abre el menú de tu navegador y elige ‘Instalar aplicación’ o ‘Agregar a pantalla de inicio’."}
         </div>
       ) : null}
     </div>
